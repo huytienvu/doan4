@@ -1,0 +1,3 @@
+chạy api npm run dev (nodemon) hoặc node app.js
+1. Link ảnh hoặc video trong api
+http://localhost:5273/upload/anh1.jpg

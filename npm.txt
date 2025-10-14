@@ -1,0 +1,11 @@
+npx create-next-app@latest
+
+chạy api npm run dev (nodemon) hoặc node app.js
+
+1. Link ảnh hoặc video trong api
+http://localhost:5273/upload/anh1.jpg
+
+INSERT INTO nguoi_dung 
+(username, password, email, so_dien_thoai, ho_ten, avatar, lan_dang_nhap_cuoi) 
+VALUES 
+('user02', '123456', 'user02@example.com', '0909090909', 'Nguyễn Văn B', NULL, NOW());
