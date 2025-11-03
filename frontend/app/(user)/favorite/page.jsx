@@ -12,7 +12,7 @@ export default function Favorite() {
 
   const fetchdata = async () => {
     try {
-      const res = await getFavoriteUser(1);
+      const res = await getFavoriteUser(Getiduser());
       setMovie(res || []);
       
     } catch (error) {

@@ -20,7 +20,7 @@ class Phim {
   }
   async getPhimBoLe(loai) {
     try {
-      const phim = await query('SELECT * FROM phim where loai = ?',[loai]);
+      const phim = await query('SELECT * FROM phim where loai = ?', [loai]);
       for (const p of phim) {
         const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [p.id]);
         p.theloai = theloai;
@@ -34,7 +34,7 @@ class Phim {
   }
   async getPhimquocgia(quocgia) {
     try {
-      const phim = await query('SELECT * FROM phim where quocgia = ?',[quocgia]);
+      const phim = await query('SELECT * FROM phim where quocgia = ?', [quocgia]);
       for (const p of phim) {
         const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [p.id]);
         p.theloai = theloai;
@@ -78,10 +78,23 @@ class Phim {
     }
   }
 
+  async getPhimDienvien(id) {
+    const phim = await query(`SELECT p.ten,p.ten_tieng_anh,p.anh_dai_dien, p.loai,p.luotxem,p.ngay_phat_hanh,p.thoi_luong FROM phim p INNER JOIN phim_dien_vien pdv 
+on p.id = pdv.phim_id
+WHERE pdv.dien_vien_id = ?`, [id]);
+    return phim
+  }
+
   async getPhimbyid(id) {
     try {
       const phim = await query('SELECT * FROM phim where id = ?', [id]);
-
+      const rows = await query(
+        `SELECT AVG(diem) AS diem_tb, COUNT(*) AS so_luot
+         FROM danhgia
+         WHERE phim_id = ?`,
+        [id]
+      );
+      phim[0].danhgia = rows[0];
       const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [id]);
       phim[0].theloai = theloai;
       const dienvien = await query('SELECT id,ten FROM dien_vien d LEFT JOIN phim_dien_vien p on p.dien_vien_id=d.id WHERE p.phim_id=?', [id])
@@ -89,7 +102,7 @@ class Phim {
 
       const tapphim = await query('SELECT t.phim_id,t.id,t.so_tap,t.video_url from `tap_phim` t WHERE t.phim_id=?', [id]);
       phim[0].tapphim = tapphim;
-      const obj =phim[0];
+      const obj = phim[0];
       return obj
     } catch (error) {
       throw error;
@@ -103,6 +116,44 @@ class Phim {
       throw error;
     }
   }
+  async filter({ quocgia, theloai_id, loai, nam }) {
+    try {
+      const [rows] = await query(
+        `CALL sp_loc_phim(?, ?, ?, ?)`,
+        [quocgia || null, theloai_id || null, loai || null, nam || null]
+      );
+      return rows; // chỉ lấy mảng dữ liệu phim
+    } catch (err) {
+      throw err;
+    }
+  }
+  async SearchPhim(keyword, page_number = 1, page_size = 20) {
+    try {
+      const offset = (page_number - 1) * page_size;
+
+      const countResult = await query(
+        'SELECT COUNT(*) AS total FROM phim WHERE ten LIKE ?',
+        [`%${keyword}%`]
+      );
+      const total_items = countResult[0].total;
+      const total_pages = Math.ceil(total_items / page_size);
+
+      const phim = await query(
+        `SELECT * FROM phim WHERE ten LIKE ? LIMIT ${page_size} OFFSET ${offset}`,
+        [`%${keyword}%`] // thêm % để tìm kiếm mờ
+      );
+
+      return {
+        page_number,
+        page_size,
+        total_pages,
+        data: phim
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async create(data) {
     const {
       ten, ten_tieng_anh, mota, anh_dai_dien,
@@ -164,7 +215,7 @@ class Phim {
       throw err;
     }
   }
-  
+
   async update(id, data) {
     const {
       ten, ten_tieng_anh, mota, anh_dai_dien,

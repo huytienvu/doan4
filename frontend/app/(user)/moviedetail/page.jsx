@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { createHistory } from '@/services/history';
 import { Getiduser } from '@/utils/auth';
+import CommentBox from '@/components/user/Comments/comments';
 
 
 const MovieWatchPage = () => {
@@ -101,21 +102,15 @@ const MovieWatchPage = () => {
 
 
   }
+  const res = async () => {
+    
+  }
+  
   useEffect(() => {
     fetdata();
-  }, [idMovie,tapParam])
-  useEffect(() => {
-    const res = async() => {
-      await createHistory(
-        {
-          user_id: Getiduser(),
-          phim_id: idMovie,
-          so_tap: tapParam
-        }
-      )
-    }
     res()
-  }, [idMovie,tapParam])
+  }, [idMovie, tapParam])
+
   useEffect(() => {
     if (loai === 'bo') {
       setActiveTab('episodes');
@@ -125,9 +120,18 @@ const MovieWatchPage = () => {
     }
   }, [loai]);
   return (
-    <div className="min-h-screen bg-black text-gray-100">
+    <div className="min-h-screen bg-black text-gray-100" onClick={ async()=> {
+      await createHistory(
+        {
+          user_id: Getiduser(),
+          phim_id: idMovie,
+          so_tap: tapParam
+        }
+      )
+    }}>
       {/* Video Player */}
-      <video controls width={1500} className='max-w-7xl mx-auto px-4 py-8' src={`http://localhost:5273/upload/video/${videourl}`}></video>
+      
+      <video controls width={1500}  className='max-w-7xl mx-auto px-4 py-8' src={`http://localhost:5273/upload/video/${videourl}`}></video>
       {/* <div className="relative w-full bg-gray-900 aspect-video">
         <img
           src={movieData.coverImage}
@@ -308,6 +312,7 @@ const MovieWatchPage = () => {
                 </div>
               )}
             </div>
+            <CommentBox id={idMovie} />
           </div>
 
           {/* Sidebar - Related Movies */}
@@ -340,6 +345,7 @@ const MovieWatchPage = () => {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

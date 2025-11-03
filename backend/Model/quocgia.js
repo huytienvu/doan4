@@ -10,20 +10,35 @@ class Quocgia {
   }
 
   async getbyid(id) {
-    return await helper('SELECT * FROM quocgia where id = ?',[id])
+    return await helper('SELECT * FROM quocgia where id = ?', [id])
   }
 
   async create(data) {
-    const {
-      ten,
-      mota
-    } = data;
+    const a =data.quocgia
 
     try {
       // 1. Insert phim
       const result = await query(
-        `INSERT INTO theloai(ten, mota) VALUES (?, ?)`,
-        [ten, mota]
+        `INSERT INTO quocgia(quocgia) VALUES (?)`,
+        [a]
+      );
+
+      return data;
+    } catch (err) {
+      throw err;
+    }
+  }
+  async update(data) {
+    const {
+      id,
+      quocgia,
+      status
+    } = data;
+
+    try {
+      const result = await query(
+        `UPDATE quocgia SET quocgia = ?, status = ? WHERE id = ?`,
+        [quocgia, status, id]
       );
 
       return data;

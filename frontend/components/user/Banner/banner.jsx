@@ -83,7 +83,7 @@ const MovieBannerSlider = () => {
   return (
     <div className="relative w-full bg-black overflow-hidden">
       {/* Banner Container */}
-      <div className="relative w-full h-[500px]">
+      <div className="relative w-full h-[700px]">
         {movie.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center text-gray-400">
             Đang tải...
@@ -100,15 +100,15 @@ const MovieBannerSlider = () => {
               {/* Gradient Overlays */}
               {/* <div className="absolute inset-0 bg-gradient-to-r from-black via-black/10 to-transparent" /> */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-transparent to-transparent" />
+              {/* <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-transparent to-transparent" /> */}
             </div>
 
             {/* Content */}
             <div className="absolute inset-0 flex items-center">
-              <div className="max-w-7xl mx-auto px-8 w-full">
+              <div className="max-w-7xl mx-auto px-8 w-full ">
                 <div className="max-w-2xl">
                   {/* Title */}
-                  <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
+                  <h1 className="text-5xl md:text-6xl font-bold my-10 text-white mb-4 drop-shadow-lg">
                     {currentBanner.ten}
                   </h1>
 

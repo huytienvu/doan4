@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../Model/user");
 const users = new User();
 
-const JWT_SECRET = "your_secret_key"; // nên để trong biến môi trường .env
+const JWT_SECRET = process.env.JWT_SECRET// nên để trong biến môi trường .env
 
 class AuthController {
   async login(req, res) {

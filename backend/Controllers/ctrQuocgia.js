@@ -28,9 +28,20 @@ const create = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const update = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = { ...req.body, id };
+    const result = await quocgia.update(data);
+    res.json({ message: "Cập nhật quốc gia thành công" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 module.exports = {
   getAll,
   getbyid,
-  create
+  create,
+  update
 };

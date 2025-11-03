@@ -48,3 +48,26 @@ exports.uploadVideo = [
     });
   }
 ];
+
+const storageImageActor = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/upload/dienvien'); // Thư mục lưu ảnh
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname); // Giữ nguyên tên file gốc
+  }
+});
+const uploadImageActor = multer({ storage: storageImageActor });
+
+exports.uploadImageActor = [
+  uploadImageActor.single('actor'), // field name = "anh"
+  (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'Không có ảnh được upload' });
+
+    const imageUrl = `/upload/dienvien/${req.file.filename}`;
+    res.json({
+      message: 'Upload ảnh thành công',
+      url: imageUrl
+    });
+  }
+];

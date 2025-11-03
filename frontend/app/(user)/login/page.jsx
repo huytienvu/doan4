@@ -3,6 +3,7 @@ import { apilogin } from "@/services/login";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -20,14 +21,13 @@ export default function LoginPage() {
       const role = res.user.role;
       // lưu token
       if (role == "Admin") {
-        alert("Đăng nhập thành công admin!");
-
         router.push("/admin/movie");
       }
       if (role == "User") {
-        alert("Đăng nhập thành công user!");
+        
         router.push("/");
       }
+      toast.success("Đăng nhập thành công!");
     } else {
       alert("Sai tài khoản hoặc mật khẩu!");
     }

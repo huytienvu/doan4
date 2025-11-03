@@ -1,17 +1,17 @@
 const mysql = require('mysql');
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
+  host: process.env.host,
+  user: process.env.user,
   password: '',
-  database: 'webxemphim'
+  database: process.env.database
 });
 
 db.connect((err) => {
   if (err) {
     throw err;
   }
-  console.log('Kết nối MySQL thành công');
+  console.log('Connect database MySQL thành công');
 });
 
 module.exports = db;

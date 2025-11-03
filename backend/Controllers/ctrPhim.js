@@ -63,6 +63,33 @@ const getTapPhim = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getPhimDienvien = async (req, res) => {
+  try {
+    const id = req.params.id
+    const data = await phim.getPhimDienvien(id);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const LocPhim = async (req, res) => {
+  try {
+    const { quocgia, theloai_id, loai, nam } = req.query;
+    const data = await phim.filter({ quocgia, theloai_id, loai, nam });
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const SearchPhim = async (req, res) => {
+  try {
+    const { key,page_number, page_size } = req.query;
+    const data = await phim.SearchPhim(key,page_number,page_size);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 const create = async (req, res) => {
   try {
     const data = req.body;
@@ -90,6 +117,9 @@ module.exports = {
   getPhimNEW,
   getPhimbyid,
   getTapPhim,
+  getPhimDienvien,
+  LocPhim,
+  SearchPhim,
   create,
   update
 };

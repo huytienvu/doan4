@@ -43,13 +43,14 @@ class Theloai {
     const {
       id,
       ten,
-      mota
+      mota,
+      status
     } = data;
 
     try {
       const result = await query(
-        `UPDATE theloai SET ten = ?, mota = ? WHERE id = ?`,
-        [ten, mota, id]
+        `UPDATE theloai SET ten = ?, mota = ?, status = ? WHERE id = ?`,
+        [ten, mota, status, id]
       );
 
       return data;

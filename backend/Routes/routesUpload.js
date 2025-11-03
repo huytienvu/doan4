@@ -6,4 +6,7 @@ router.post('/image', controller.uploadImage);
 
 router.post('/video', controller.uploadVideo);
 
+router.post('/dienvien', controller.uploadImageActor);
+
+
 module.exports = router;

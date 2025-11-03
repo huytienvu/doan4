@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = 'your_secret_key';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function authenticate(req, res, next) {
   try {
@@ -29,7 +29,8 @@ function role(allowedRoles = []) {
     return next();
   };
 }
-
-module.exports = { authenticate, role };
+const Admin = role(['Admin']);
+const User = role(['User']);
+module.exports = { authenticate, role,Admin,User };
 
 

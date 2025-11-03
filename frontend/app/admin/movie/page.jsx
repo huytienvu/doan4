@@ -1,6 +1,31 @@
 "use client"
-import React, { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, X, Save, Eye } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  FilmIcon,
+  XMarkIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  PlayCircleIcon,
+  EyeIcon,
+  StarIcon,
+  UserIcon,
+  TagIcon,
+  CloudArrowUpIcon,
+  DocumentTextIcon,
+  PhotoIcon,
+  PlayIcon
+} from '@heroicons/react/24/outline';
+import {
+  LockClosedIcon,
+  LockOpenIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
+import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { getListMovie, getMoviebyId, CreateMovie, UpdateMovie } from '../../../services/admin/movie';
 import { getAllCategory } from '../../../services/category';
 import { getAllActor } from '../../../services/actor';
@@ -9,153 +34,68 @@ import { APIUploadImage, APIUploadVideo } from '../../../services/upload';
 
 const MovieAdminInterface = () => {
   const [phim, setPhim] = useState([]);
-    
-    const fet = async () => {
-        try {
-            const movies = await getListMovie();
-            setPhim(Array.isArray(movies) ? movies : []);
-        } catch (e) {
-            console.error(e);
-            setPhim([]);
-        }
-    }
-    useEffect(() => {
-        fet();
-    }, [])
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMovie, setEditingMovie] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [activeTab, setActiveTab] = useState('info');
+
+  // Form data
   const [currentMovie, setCurrentMovie] = useState({
     title: '',
-    tentienganh:'',
-    daodien:'',
-    mota:'',
+    tentienganh: '',
+    daodien: '',
+    mota: '',
     type: 'single',
     genres: [],
     actors: [],
-    releaseYear: 2025,
+    releaseYear: new Date().getFullYear(),
     duration: 0,
     poster: '',
     video_url: '',
     country: '',
     episodes: []
   });
+
+  // Selected IDs for API
   const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
   const [selectedActorIds, setSelectedActorIds] = useState([]);
 
-  const [newGenre, setNewGenre] = useState('');
-  const [newActor, setNewActor] = useState('');
-  const [newEpisode, setNewEpisode] = useState({ season: 1, episode: 1, title: '', duration: 0 });
+  // Options from API
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [actorOptions, setActorOptions] = useState([]);
   const [countryOptions, setCountryOptions] = useState([]);
 
-  const handleUploadPoster = async (file) => {
+  // Search states for dropdowns
+  const [categorySearch, setCategorySearch] = useState('');
+  const [actorSearch, setActorSearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showActorDropdown, setShowActorDropdown] = useState(false);
+
+  // Upload states
+  const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+
+  // Refs for click outside
+  const categoryDropdownRef = useRef(null);
+  const actorDropdownRef = useRef(null);
+
+  // Fetch movies
+  const fetchMovies = async () => {
     try {
-      if (!file) return;
-      const res = await APIUploadImage(file);
-      // backend returns { url: '/upload/anhdaidien/filename.ext' }
-      const url = res?.url || '';
-      const filename = url.split('/').pop() || '';
-      setCurrentMovie({ ...currentMovie, poster: filename });
+      const movies = await getListMovie();
+      setPhim(Array.isArray(movies) ? movies : []);
     } catch (e) {
       console.error(e);
-      alert('Upload ảnh thất bại');
+      setPhim([]);
     }
   };
 
-  const handleUploadSingleVideo = async (file) => {
-    try {
-      if (!file) return;
-      const res = await APIUploadVideo(file);
-      const url = res?.url || '';
-      const filename = url.split('/').pop() || '';
-      setCurrentMovie({ ...currentMovie, video_url: filename });
-    } catch (e) {
-      console.error(e);
-      alert('Upload video thất bại');
-    }
-  };
+  useEffect(() => {
+    fetchMovies();
+  }, []);
 
-  const handleUploadEpisodeVideo = async (file, season, episode) => {
-    try {
-      if (!file) return;
-      const res = await APIUploadVideo(file);
-      const url = res?.url || '';
-      const filename = url.split('/').pop() || '';
-      setCurrentMovie(prev => ({
-        ...prev,
-        episodes: (prev.episodes || []).map(ep =>
-          ep.season === season && ep.episode === episode ? { ...ep, title: filename } : ep
-        )
-      }));
-    } catch (e) {
-      console.error(e);
-      alert('Upload video tập thất bại');
-    }
-  };
-
-  const openAddModal = () => {
-    setCurrentMovie({
-      title: '',
-      type: 'single',
-      tentienganh:'',
-      daodien:'',
-      mota:'',
-      genres: [],
-      actors: [],
-      releaseYear: new Date().getFullYear(),
-      duration: 0,
-      poster: '',
-      video_url: '',
-      country: '',
-      episodes: []
-    });
-    setSelectedCategoryIds([]);
-    setSelectedActorIds([]);
-    setEditingMovie(null);
-    setIsModalOpen(true);
-  };
-
-  const mapApiMovieToForm = (detail) => {
-    return {
-      title: detail?.ten || '',
-      type: detail?.loai === 'bo' ? 'series' : 'single',
-      tentienganh: detail?.ten_tieng_anh || '',
-      daodien: detail?.daodien || '',
-      mota: detail?.mota || '',
-      genres: Array.isArray(detail?.theloai) ? detail.theloai.map(g => (typeof g === 'object' && g ? (g.ten || '') : String(g))) : [],
-      actors: Array.isArray(detail?.dienvien) ? detail.dienvien.map(a => (typeof a === 'object' && a ? (a.ten || '') : String(a))) : [],
-      releaseYear: detail?.ngay_phat_hanh ,
-      duration: Number(detail?.thoi_luong || 0),
-      poster: detail?.anh_dai_dien || '',
-      video_url: detail?.video_url || '',
-      country: detail?.quocgia || '',
-      episodes: Array.isArray(detail?.tapphim) ? detail.tapphim.map(ep => ({
-        season: 1,
-        episode: Number(ep?.so_tap || 0),
-        title: ep?.video_url || '',
-        duration: 0,
-      })) : [],
-    };
-  };
-
-  const openEditModal = async (movieId) => {
-    try {
-      setIsModalOpen(true);
-      setEditingMovie(movieId);
-      const res = await getMoviebyId(movieId);
-      const detail = Array.isArray(res?.phim) ? res.phim[0] : res;
-      const formData = mapApiMovieToForm(detail || {});
-      setCurrentMovie(formData);
-      // hydrate selected ids for edit mode
-      setSelectedCategoryIds(Array.isArray(detail?.theloai) ? detail.theloai.map(g => g.id).filter(Boolean) : []);
-      setSelectedActorIds(Array.isArray(detail?.dienvien) ? detail.dienvien.map(a => a.id).filter(Boolean) : []);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
+  // Load options when modal opens
   useEffect(() => {
     const loadOptions = async () => {
       try {
@@ -169,9 +109,6 @@ const MovieAdminInterface = () => {
         setCountryOptions(Array.isArray(couns) ? couns : []);
       } catch (e) {
         console.error(e);
-        setCategoryOptions([]);
-        setActorOptions([]);
-        setCountryOptions([]);
       }
     };
     if (isModalOpen) {
@@ -179,603 +116,1063 @@ const MovieAdminInterface = () => {
     }
   }, [isModalOpen]);
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  // Click outside to close dropdowns
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+        setShowCategoryDropdown(false);
+      }
+      if (actorDropdownRef.current && !actorDropdownRef.current.contains(event.target)) {
+        setShowActorDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter categories for dropdown
+  const filteredCategories = categoryOptions.filter(cat =>
+    cat && cat.ten &&
+    cat.ten.toLowerCase().includes(categorySearch.toLowerCase()) &&
+    !selectedCategoryIds.includes(cat.id)
+  );
+
+  // Filter actors for dropdown
+  const filteredActors = actorOptions.filter(actor =>
+    actor && actor.ten &&
+    actor.ten.toLowerCase().includes(actorSearch.toLowerCase()) &&
+    !selectedActorIds.includes(actor.id)
+  );
+
+  // Filter movies for display
+  const filteredMovies = phim.filter(movie => {
+    const matchSearch = movie.ten?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const matchType = filterType === 'all' ||
+      (filterType === 'single' && movie.loai === 'le') ||
+      (filterType === 'series' && movie.loai === 'bo');
+    return matchSearch && matchType;
+  });
+
+  // Handle upload poster
+  const handleUploadPoster = async (file) => {
+    if (!file) return;
+    setUploadingPoster(true);
+    try {
+      const res = await APIUploadImage(file);
+      const url = res?.url || '';
+      const filename = url.split('/').pop() || '';
+      setCurrentMovie({ ...currentMovie, poster: filename });
+    } catch (e) {
+      console.error(e);
+      alert('Upload ảnh thất bại');
+    } finally {
+      setUploadingPoster(false);
+    }
+  };
+
+  // Handle upload video for single movie
+  const handleUploadSingleVideo = async (file) => {
+    if (!file) return;
+    setUploadingVideo(true);
+    try {
+      const res = await APIUploadVideo(file);
+      const url = res?.url || '';
+      const filename = url.split('/').pop() || '';
+      setCurrentMovie({ ...currentMovie, video_url: filename });
+    } catch (e) {
+      console.error(e);
+      alert('Upload video thất bại');
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
+  // Handle upload episode video
+  const handleUploadEpisodeVideo = async (file, episodeId) => {
+    if (!file) return;
+    try {
+      const res = await APIUploadVideo(file);
+      const url = res?.url || '';
+      const filename = url.split('/').pop() || '';
+      setCurrentMovie(prev => ({
+        ...prev,
+        episodes: prev.episodes.map(ep =>
+          ep.id === episodeId ? { ...ep, video_url: filename } : ep
+        )
+      }));
+    } catch (e) {
+      console.error(e);
+      alert('Upload video tập thất bại');
+    }
+  };
+
+  // Add category
+  const addCategory = (category) => {
+    if (!selectedCategoryIds.includes(category.id)) {
+      setSelectedCategoryIds([...selectedCategoryIds, category.id]);
+      setCurrentMovie({
+        ...currentMovie,
+        genres: [...currentMovie.genres, { id: category.id, ten: category.ten }]
+      });
+    }
+    setCategorySearch('');
+    setShowCategoryDropdown(false);
+  };
+
+  // Remove category
+  const removeCategory = (categoryId) => {
+    setSelectedCategoryIds(selectedCategoryIds.filter(id => id !== categoryId));
+    setCurrentMovie({
+      ...currentMovie,
+      genres: currentMovie.genres.filter(g => g.id !== categoryId)
+    });
+  };
+
+  // Add actor
+  const addActor = (actor) => {
+    if (!selectedActorIds.includes(actor.id)) {
+      setSelectedActorIds([...selectedActorIds, actor.id]);
+      setCurrentMovie({
+        ...currentMovie,
+        actors: [...currentMovie.actors, { id: actor.id, ten: actor.ten }]
+      });
+    }
+    setActorSearch('');
+    setShowActorDropdown(false);
+  };
+
+  // Remove actor
+  const removeActor = (actorId) => {
+    setSelectedActorIds(selectedActorIds.filter(id => id !== actorId));
+    setCurrentMovie({
+      ...currentMovie,
+      actors: currentMovie.actors.filter(a => a.id !== actorId)
+    });
+  };
+
+  // Add episode
+  const addEpisode = () => {
+    const newEpisode = {
+      id: Date.now(),
+      episode: currentMovie.episodes.length + 1,
+      video_url: '',
+      duration: 0
+    };
+    setCurrentMovie({
+      ...currentMovie,
+      episodes: [...currentMovie.episodes, newEpisode]
+    });
+  };
+
+  // Remove episode
+  const removeEpisode = (episodeId) => {
+    setCurrentMovie({
+      ...currentMovie,
+      episodes: currentMovie.episodes.filter(ep => ep.id !== episodeId)
+    });
+  };
+
+  // Open add modal
+  const openAddModal = () => {
     setCurrentMovie({
       title: '',
+      tentienganh: '',
+      daodien: '',
+      mota: '',
       type: 'single',
       genres: [],
       actors: [],
       releaseYear: new Date().getFullYear(),
       duration: 0,
       poster: '',
+      video_url: '',
+      country: '',
       episodes: []
     });
+    setSelectedCategoryIds([]);
+    setSelectedActorIds([]);
     setEditingMovie(null);
-    setNewGenre('');
-    setNewActor('');
-    setNewEpisode({ season: 1, episode: 1, title: '', duration: 0 });
+    setActiveTab('info');
+    setIsModalOpen(true);
   };
 
+  // Open edit modal
+  const openEditModal = async (movieId) => {
+    try {
+      setIsModalOpen(true);
+      setEditingMovie(movieId);
+      const res = await getMoviebyId(movieId);
+      const detail = Array.isArray(res?.phim) ? res.phim[0] : res;
+
+      // Map API data to form
+      const genres = Array.isArray(detail?.theloai) ? detail.theloai.map(g => ({
+        id: g.id,
+        ten: typeof g === 'object' ? g.ten : String(g)
+      })) : [];
+
+      const actors = Array.isArray(detail?.dienvien) ? detail.dienvien.map(a => ({
+        id: a.id,
+        ten: typeof a === 'object' ? a.ten : String(a)
+      })) : [];
+
+      const episodes = Array.isArray(detail?.tapphim) ? detail.tapphim.map((ep, index) => ({
+        id: Date.now() + index,
+        episode: ep.so_tap || index + 1,
+        video_url: ep.video_url || '',
+        duration: 0
+      })) : [];
+
+      setCurrentMovie({
+        title: detail?.ten || '',
+        tentienganh: detail?.ten_tieng_anh || '',
+        daodien: detail?.daodien || '',
+        mota: detail?.mota || '',
+        type: detail?.loai === 'bo' ? 'series' : 'single',
+        genres,
+        actors,
+        releaseYear: detail?.ngay_phat_hanh || new Date().getFullYear(),
+        duration: Number(detail?.thoi_luong || 0),
+        poster: detail?.anh_dai_dien || '',
+        video_url: detail?.video_url || '',
+        country: detail?.quocgia || '',
+        episodes
+      });
+
+      setSelectedCategoryIds(genres.map(g => g.id).filter(Boolean));
+      setSelectedActorIds(actors.map(a => a.id).filter(Boolean));
+      setActiveTab('info');
+    } catch (e) {
+      console.error(e);
+      alert('Không thể tải thông tin phim');
+    }
+  };
+
+  // Save movie
   const handleSaveMovie = async () => {
     if (!currentMovie.title.trim()) {
       alert('Vui lòng nhập tên phim!');
       return;
     }
 
-    if (editingMovie) {
-      try {
-        const loai = currentMovie.type === 'series' ? 'bo' : 'le';
-        const payload = {
-          ten: currentMovie.title,
-          ten_tieng_anh: currentMovie.tentienganh || '',
-          mota: currentMovie.mota || '',
-          anh_dai_dien: currentMovie.poster || '',
-          daodien: currentMovie.daodien || '',
-          quocgia: currentMovie.country || '',
-          ngay_phat_hanh: currentMovie.releaseYear,
-          trang_thai: '',
-          loai,
-          thoi_luong: loai === 'le' ? (currentMovie.duration || null) : null,
-          video_url: loai === 'le' ? (currentMovie.video_url || null) : null,
-          nhan_dan: '',
-          tap_phim: loai === 'bo'
-            ? (currentMovie.episodes || [])
-                .filter(ep => (ep?.title || '').trim())
-                .map(ep => ({
-                  so_tap: ep.episode,
-                  video_url: ep.title.trim()
-                }))
-            : [],
-          theloai_ids: selectedCategoryIds,
-          dienvien_ids: selectedActorIds,
-        };
+    const loai = currentMovie.type === 'series' ? 'bo' : 'le';
+    const payload = {
+      ten: currentMovie.title,
+      ten_tieng_anh: currentMovie.tentienganh || '',
+      mota: currentMovie.mota || '',
+      anh_dai_dien: currentMovie.poster || '',
+      daodien: currentMovie.daodien || '',
+      quocgia: currentMovie.country || '',
+      ngay_phat_hanh: currentMovie.releaseYear,
+      trang_thai: '',
+      loai,
+      thoi_luong: loai === 'le' ? (currentMovie.duration || null) : null,
+      video_url: loai === 'le' ? (currentMovie.video_url || null) : null,
+      nhan_dan: '',
+      tap_phim: loai === 'bo'
+        ? currentMovie.episodes
+          .filter(ep => ep.video_url)
+          .map(ep => ({
+            so_tap: ep.episode,
+            video_url: ep.video_url
+          }))
+        : [],
+      theloai_ids: selectedCategoryIds,
+      dienvien_ids: selectedActorIds,
+    };
+
+    try {
+      if (editingMovie) {
         await UpdateMovie(editingMovie, payload);
-        await fet();
-        closeModal();
-      } catch (e) {
-        console.error(e);
-        alert('Cập nhật phim thất bại');
-      }
-    } else {
-      try {
-        const loai = currentMovie.type === 'series' ? 'bo' : 'le';
-        const payload = {
-          ten: currentMovie.title,
-          ten_tieng_anh: currentMovie.tentienganh || '',
-          mota: currentMovie.mota || '',
-          anh_dai_dien: currentMovie.poster || '',
-          daodien: currentMovie.daodien || '',
-          quocgia: currentMovie.country || '',
-          ngay_phat_hanh: currentMovie.releaseYear,
-          trang_thai: '',
-          loai,
-          thoi_luong: loai === 'le' ? (currentMovie.duration || null) : null,
-          video_url: loai === 'le' ? (currentMovie.video_url || null) : null,
-          nhan_dan: '',
-          tap_phim: loai === 'bo'
-            ? (currentMovie.episodes || [])
-                .filter(ep => (ep?.title || '').trim())
-                .map(ep => ({
-                  so_tap: ep.episode,
-                  video_url: ep.title.trim()
-                }))
-            : [],
-          theloai_ids: selectedCategoryIds,
-          dienvien_ids: selectedActorIds,
-        };
+      } else {
         await CreateMovie(payload);
-        await fet();
-        closeModal();
-      } catch (e) {
-        console.error(e);
-        alert('Thêm phim thất bại');
       }
+      await fetchMovies();
+      closeModal();
+    } catch (e) {
+      console.error(e);
+      alert(editingMovie ? 'Cập nhật phim thất bại' : 'Thêm phim thất bại');
     }
   };
 
+  // Delete movie
   const handleDeleteMovie = (id) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa phim này?')) {
-      alert("Sẽ cải tiến")
+      alert("Chức năng xóa sẽ được cập nhật");
     }
   };
 
-  const addGenre = () => {
-    if (!newGenre) return;
-    const found = categoryOptions.find(c => String(c.id) === String(newGenre));
-    if (!found) return;
-    if (!selectedCategoryIds.includes(found.id)) {
-      setSelectedCategoryIds([...selectedCategoryIds, found.id]);
-      setCurrentMovie({
-        ...currentMovie,
-        genres: [...currentMovie.genres, found.ten]
-      });
-    }
-    setNewGenre('');
-  };
-
-  const removeGenre = (genreToRemove) => {
-    const idx = currentMovie.genres.findIndex(g => g === genreToRemove);
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingMovie(null);
     setCurrentMovie({
-      ...currentMovie,
-      genres: currentMovie.genres.filter((_, i) => i !== idx)
+      title: '',
+      tentienganh: '',
+      daodien: '',
+      mota: '',
+      type: 'single',
+      genres: [],
+      actors: [],
+      releaseYear: new Date().getFullYear(),
+      duration: 0,
+      poster: '',
+      video_url: '',
+      country: '',
+      episodes: []
     });
-    if (idx > -1) {
-      setSelectedCategoryIds(selectedCategoryIds.filter((_, i) => i !== idx));
-    }
+    setSelectedCategoryIds([]);
+    setSelectedActorIds([]);
+    setCategorySearch('');
+    setActorSearch('');
+    setActiveTab('info');
   };
 
-  const addActor = () => {
-    if (!newActor) return;
-    const found = actorOptions.find(a => String(a.id) === String(newActor));
-    if (!found) return;
-    if (!selectedActorIds.includes(found.id)) {
-      setSelectedActorIds([...selectedActorIds, found.id]);
-      setCurrentMovie({
-        ...currentMovie,
-        actors: [...currentMovie.actors, found.ten]
-      });
-    }
-    setNewActor('');
-  };
+  const handleToggleStatus = async (movieId, currentStatus) => {
+    const newStatus = currentStatus === 'Khóa' || currentStatus === 'khoa' ? 'Hiển thị' : 'Khóa';
 
-  const removeActor = (actorToRemove) => {
-    const idx = currentMovie.actors.findIndex(a => a === actorToRemove);
-    setCurrentMovie({
-      ...currentMovie,
-      actors: currentMovie.actors.filter((_, i) => i !== idx)
-    });
-    if (idx > -1) {
-      setSelectedActorIds(selectedActorIds.filter((_, i) => i !== idx));
-    }
-  };
+    // Hiển thị confirm dialog
+    const action = newStatus === 'Khóa' ? 'khóa' : 'mở khóa';
+    const confirmed = confirm(`Bạn có chắc chắn muốn ${action} phim này?`);
 
-  const addEpisode = () => {
-    if (newEpisode.title.trim()) {
-      const episodeExists = currentMovie.episodes.some(ep => 
-        ep.season === newEpisode.season && ep.episode === newEpisode.episode
+    if (!confirmed) return;
+
+    try {
+      // Call API update status
+      // await updateMovieStatus(movieId, newStatus);
+
+      // Update local state
+      setPhim(prevMovies =>
+        prevMovies.map(movie =>
+          movie.id === movieId
+            ? { ...movie, status: newStatus }
+            : movie
+        )
       );
-      
-      if (!episodeExists) {
-        setCurrentMovie({
-          ...currentMovie,
-          episodes: [...currentMovie.episodes, { ...newEpisode }].sort((a, b) => {
-            if (a.season !== b.season) return a.season - b.season;
-            return a.episode - b.episode;
-          })
-        });
-        setNewEpisode({ season: 1, episode: 1, title: '', duration: 0 });
-      } else {
-        alert('Tập phim này đã tồn tại!');
-      }
+
+      // Show success notification
+      alert(`Đã ${action} phim thành công!`);
+    } catch (error) {
+      console.error('Error updating movie status:', error);
+      alert(`Không thể ${action} phim. Vui lòng thử lại!`);
     }
   };
-
-  const removeEpisode = (season, episode) => {
-    setCurrentMovie({
-      ...currentMovie,
-      episodes: currentMovie.episodes.filter(ep => 
-        !(ep.season === season && ep.episode === episode)
-      )
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Quản Lý Phim</h1>
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-3 rounded-xl">
+                <FilmIcon className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Quản Lý Phim
+                </h1>
+                <p className="text-gray-500 mt-1">Quản lý kho phim và series của bạn</p>
+              </div>
+            </div>
             <button
               onClick={openAddModal}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
             >
-              <Plus size={20} />
-              Thêm Phim Mới
+              <PlusIcon className="h-5 w-5" />
+              <span>Thêm Phim Mới</span>
             </button>
           </div>
         </div>
 
+        {/* Search and Filter */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-transparent rounded-xl focus:border-purple-400 focus:outline-none focus:bg-white transition-all duration-200"
+                  placeholder="Tìm kiếm phim..."
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl font-medium text-gray-700 border border-gray-200 focus:outline-none focus:border-purple-400"
+              >
+                <option value="all">Tất cả</option>
+                <option value="single">Phim lẻ</option>
+                <option value="series">Phim bộ</option>
+              </select>
+
+              <button className="px-5 py-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-xl font-medium text-gray-700 transition-all duration-200 flex items-center space-x-2 border border-gray-200">
+                <FunnelIcon className="h-5 w-5" />
+                <span>Bộ lọc</span>
+              </button>
+            </div>
+          </div>
+
+          {searchTerm && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-600">
+                Tìm thấy <span className="font-semibold text-purple-600">{filteredMovies.length}</span> phim
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* Movies Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {phim.map((movie) => (
-            <div key={movie.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-              <div className="relative aspect-[0.8]">
-                <img 
-                  src={`http://localhost:5273/upload/anhdaidien/${movie.anh_dai_dien}` || 'https://via.placeholder.com/300x450?text=No+Image'} 
-                  alt={movie.ten}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-2 right-2">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    movie.loai === 'bo' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {movie.loai === 'bo' ? 'Phim Bộ' : 'Phim Lẻ'}
-                  </span>
+          {filteredMovies.map((movie) => {
+            // Giả định movie.trang_thai có thể là 'active' hoặc 'locked'
+            const isLocked = movie.status === "Khóa";
+
+            return (
+              <div key={movie.id} className="bg-white rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200 overflow-hidden group relative">
+
+
+                {/* Poster */}
+                <div className="relative aspect-[2/3] bg-gray-100">
+                  <img
+                    src={movie.anh_dai_dien ? `http://localhost:5273/upload/anhdaidien/${movie.anh_dai_dien}` : 'https://via.placeholder.com/300x450'}
+                    alt={movie.ten}
+                    className={`w-full h-full object-cover ${isLocked ? 'opacity-50 grayscale' : ''}`}
+                  />
+
+                  {/* Overlay with actions */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex justify-between items-end">
+                        <div>
+                          <p className="text-white text-sm mb-1">{movie.ngay_phat_hanh} • {movie.quocgia}</p>
+                          <h3 className="text-white text-lg font-bold line-clamp-1">{movie.ten}</h3>
+                        </div>
+                        <div className="flex space-x-2">
+                          {/* Toggle Status Button */}
+                          <button
+                            onClick={() => handleToggleStatus(movie.id, movie.status)}
+                            className={`${isLocked
+                              ? 'bg-green-500/80 hover:bg-green-600'
+                              : 'bg-yellow-500/80 hover:bg-yellow-600'
+                              } backdrop-blur-sm text-white p-2 rounded-lg transition-colors`}
+                            title={isLocked ? 'Mở khóa phim' : 'Khóa phim'}
+                          >
+                            {isLocked ? (
+                              <LockOpenIcon className="h-4 w-4" />
+                            ) : (
+                              <LockClosedIcon className="h-4 w-4" />
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() => openEditModal(movie.id)}
+                            className="bg-blue-500/80 backdrop-blur-sm text-white p-2 rounded-lg hover:bg-blue-600 transition-colors"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteMovie(movie.id)}
+                            className="bg-red-500/80 backdrop-blur-sm text-white p-2 rounded-lg hover:bg-red-600 transition-colors"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status Badge - Top Right */}
+                  <div className="absolute top-4 right-4">
+                    {isLocked ? (
+                      <div className="flex items-center gap-1 px-2 py-1 bg-red-500/90 backdrop-blur-sm text-white text-xs font-semibold rounded-lg shadow-lg">
+                        <LockClosedIcon className="h-3 w-3" />
+                        <span>Đã khóa</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 px-2 py-1 bg-green-500/90 backdrop-blur-sm text-white text-xs font-semibold rounded-lg shadow-lg">
+                        <CheckCircleIcon className="h-3 w-3" />
+                        <span>Hiển thị</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Type badge - Top Left */}
+                  <div className="absolute top-4 left-4">
+                    <span className={`px-3 py-1 rounded-lg text-xs font-semibold backdrop-blur-sm ${movie.loai === 'bo'
+                      ? 'bg-purple-500/80 text-white'
+                      : 'bg-blue-500/80 text-white'
+                      }`}>
+                      {movie.loai === 'bo' ? 'Phim bộ' : 'Phim lẻ'}
+                    </span>
+                  </div>
+
+                  {/* View Count - Bottom Left */}
+                  {movie.luot_xem && (
+                    <div className="absolute bottom-4 left-4">
+                      <div className="flex items-center gap-1 px-2 py-1 bg-black/70 backdrop-blur-sm text-white text-xs rounded">
+                        <EyeIcon className="h-3 w-3" />
+                        <span>{movie.luot_xem.toLocaleString()} lượt xem</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <div className="p-4">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">{movie.ten}</h3>
-                <p className="text-gray-600 text-sm mb-2">Năm: {movie.ngay_phat_hanh}</p>
-                
-                <div className="mb-3">
-                  <div className="flex flex-wrap gap-1">
-                    {(movie.theloai || []).slice(0, 2).map((genre, index) => (
-                      <span key={index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                        {typeof genre === 'object' && genre !== null ? (genre.ten || '') : String(genre)}
+
+                {/* Info */}
+                <div className="p-4">
+                  {/* Status Indicator Bar */}
+                  {/* <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${isLocked ? 'bg-red-500' : 'bg-green-500'} animate-pulse`}></div>
+                      <span className={`text-xs font-medium ${isLocked ? 'text-red-600' : 'text-green-600'}`}>
+                        {isLocked ? 'Không công khai' : 'Đang công khai'}
+                      </span>
+                    </div>
+
+                  </div> */}
+
+                  {/* Categories */}
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {(movie.theloai || []).slice(0, 2).map((cat, index) => (
+                      <span key={index} className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                        {typeof cat === 'object' ? cat.ten : cat}
                       </span>
                     ))}
                     {(movie.theloai || []).length > 2 && (
-                      <span className="text-gray-500 text-xs">+{(movie.theloai || []).length - 2} thể loại</span>
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                        +{movie.theloai.length - 2}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className={`font-bold mb-2 line-clamp-1 ${isLocked ? 'text-gray-500' : 'text-gray-800'}`}>
+                    {movie.ten}
+                  </h3>
+
+                  {/* Actors */}
+                  <p className="text-xs text-gray-500 mb-2 line-clamp-1">
+                    {(movie.dienvien || []).slice(0, 2).map(dv =>
+                      typeof dv === 'object' ? dv.ten : dv
+                    ).join(', ')}
+                    {(movie.dienvien || []).length > 2 && ` +${movie.dienvien.length - 2}`}
+                  </p>
+
+                  {/* Additional Info */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <div className="flex items-center gap-2">
+                      {movie.chat_luong && (
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                          {movie.chat_luong}
+                        </span>
+                      )}
+                      {movie.nam_phat_hanh && (
+                        <span className="text-xs text-gray-400">
+                          {movie.nam_phat_hanh}
+                        </span>
+                      )}
+                    </div>
+                    {movie.thoi_luong && (
+                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <ClockIcon className="h-3 w-3" />
+                        {movie.thoi_luong} phút
+                      </span>
                     )}
                   </div>
                 </div>
-
-                <div className="mb-3">
-                  <p className="text-gray-600 text-sm">
-                    Diễn viên: {(movie.dienvien || []).slice(0, 2).map((dv) => (typeof dv === 'object' && dv !== null ? (dv.ten || '') : String(dv))).join(', ')}
-                    {(movie.dienvien || []).length > 2 && ` +${(movie.dienvien || []).length - 2} người`}
-                  </p>
-                </div>
-
-                
-
-                <div className="flex justify-between items-center">
-                  <button
-                    onClick={() => openEditModal(movie.id)}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded transition-colors"
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteMovie(movie.id)}
-                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded transition-colors"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">
+        {/* Empty state */}
+        {filteredMovies.length === 0 && (
+          <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
+            <FilmIcon className="h-20 w-20 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">Không tìm thấy phim nào</p>
+            <p className="text-gray-400 mt-2">Thử tìm kiếm với từ khóa khác hoặc thêm phim mới</p>
+          </div>
+        )}
+
+        {/* Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">Tổng phim</p>
+                <p className="text-3xl font-bold text-gray-800 mt-2">{phim.length}</p>
+              </div>
+              <FilmIcon className="h-10 w-10 text-purple-500" />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">Phim lẻ</p>
+                <p className="text-3xl font-bold text-gray-800 mt-2">
+                  {phim.filter(m => m.loai === 'le').length}
+                </p>
+              </div>
+              <PlayCircleIcon className="h-10 w-10 text-blue-500" />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-pink-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">Phim bộ</p>
+                <p className="text-3xl font-bold text-gray-800 mt-2">
+                  {phim.filter(m => m.loai === 'bo').length}
+                </p>
+              </div>
+              <DocumentTextIcon className="h-10 w-10 text-pink-500" />
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm">Đạo diễn</p>
+                <p className="text-xl font-bold text-gray-800 mt-2">
+                  {new Set(phim.map(m => m.daodien).filter(Boolean)).size}
+                </p>
+              </div>
+              <UserIcon className="h-10 w-10 text-green-500" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Add/Edit Movie */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-white">
                   {editingMovie ? 'Chỉnh Sửa Phim' : 'Thêm Phim Mới'}
                 </h2>
-                <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
-                  <X size={24} />
+                <button
+                  onClick={closeModal}
+                  className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+                >
+                  <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
+            </div>
 
-              <div className="p-6 space-y-6">
-                {/* Basic Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tên Phim *</label>
-                    <input
-                      type="text"
-                      value={currentMovie.title}
-                      onChange={(e) => setCurrentMovie({...currentMovie, title: e.target.value})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Nhập tên phim"
-                    />
-                  </div>
+            {/* Tabs */}
+            <div className="border-b border-gray-200 bg-gray-50">
+              <div className="flex space-x-8 px-6">
+                <button
+                  onClick={() => setActiveTab('info')}
+                  className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'info'
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                  Thông tin phim
+                </button>
+                {currentMovie.type === 'series' && (
+                  <button
+                    onClick={() => setActiveTab('episodes')}
+                    className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'episodes'
+                      ? 'border-purple-500 text-purple-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                  >
+                    Danh sách tập ({currentMovie.episodes.length})
+                  </button>
+                )}
+              </div>
+            </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Loại Phim</label>
-                    <select
-                      value={currentMovie.type}
-                      onChange={(e) => setCurrentMovie({...currentMovie, type: e.target.value, episodes: e.target.value === 'single' ? [] : currentMovie.episodes})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="single">Phim Lẻ</option>
-                      <option value="series">Phim Bộ</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Quốc Gia</label>
-                    <select
-                      value={currentMovie.country}
-                      onChange={(e) => setCurrentMovie({ ...currentMovie, country: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Chọn quốc gia</option>
-                      {countryOptions.map((c) => (
-                        <option key={c.id || c.quocgia} value={c.quocgia || ''}>{c.quocgia}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Năm Phát Hành</label>
-                    <input
-                      type="number"
-                      value={currentMovie.releaseYear}
-                      onChange={(e) => setCurrentMovie({...currentMovie, releaseYear: parseInt(e.target.value)  })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      min="1900"
-                      max="2030"
-                    />
-                  </div>
-
-                  {currentMovie.type === 'single' && (
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+              {activeTab === 'info' ? (
+                <div className="space-y-6">
+                  {/* Basic Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Thời Lượng (phút)</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Tên phim <span className="text-red-500">*</span>
+                      </label>
                       <input
-                        type="number"
-                        value={currentMovie.duration}
-                        onChange={(e) => setCurrentMovie({...currentMovie, duration: parseInt(e.target.value) || 0})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        min="0"
+                        type="text"
+                        value={currentMovie.title}
+                        onChange={(e) => setCurrentMovie({ ...currentMovie, title: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                        placeholder="Nhập tên phim..."
                       />
                     </div>
-                  )}
 
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Poster</label>
-                    <div className="flex items-center gap-3">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Tên tiếng Anh
+                      </label>
                       <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleUploadPoster(e.target.files?.[0])}
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        type="text"
+                        value={currentMovie.tentienganh}
+                        onChange={(e) => setCurrentMovie({ ...currentMovie, tentienganh: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                        placeholder="Nhập tên tiếng Anh..."
                       />
-                      {currentMovie.poster && (
-                        <span className="text-sm text-gray-600 truncate">{currentMovie.poster}</span>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Loại phim <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={currentMovie.type}
+                        onChange={(e) => setCurrentMovie({ ...currentMovie, type: e.target.value, episodes: [] })}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                      >
+                        <option value="single">Phim lẻ</option>
+                        <option value="series">Phim bộ</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Quốc gia
+                      </label>
+                      <select
+                        value={currentMovie.country}
+                        onChange={(e) => setCurrentMovie({ ...currentMovie, country: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                      >
+                        <option value="">Chọn quốc gia</option>
+                        {countryOptions.map((c) => (
+                          <option key={c.id} value={c.quocgia}>{c.quocgia}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Năm phát hành
+                      </label>
+                      <input
+                        type="number"
+                        value={currentMovie.releaseYear}
+                        onChange={(e) => setCurrentMovie({ ...currentMovie, releaseYear: parseInt(e.target.value) })}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                        min="1900"
+                        max="2030"
+                      />
+                    </div>
+
+                    {currentMovie.type === 'single' && (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Thời lượng (phút)
+                        </label>
+                        <input
+                          type="number"
+                          value={currentMovie.duration}
+                          onChange={(e) => setCurrentMovie({ ...currentMovie, duration: parseInt(e.target.value) || 0 })}
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                          min="0"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Đạo diễn
+                      </label>
+                      <input
+                        type="text"
+                        value={currentMovie.daodien}
+                        onChange={(e) => setCurrentMovie({ ...currentMovie, daodien: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                        placeholder="Nhập tên đạo diễn..."
+                      />
+                    </div>
+                  </div>
+
+                  {/* Categories Section */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <TagIcon className="inline h-4 w-4 mr-1" />
+                      Thể loại
+                    </label>
+
+                    {/* Selected categories */}
+                    {currentMovie.genres.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {currentMovie.genres.map((genre) => (
+                          <span
+                            key={genre.id}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
+                          >
+                            {genre.ten}
+                            <button
+                              onClick={() => removeCategory(genre.id)}
+                              className="hover:bg-purple-200 rounded-full p-0.5"
+                            >
+                              <XMarkIcon className="h-3.5 w-3.5" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Category search dropdown */}
+                    <div className="relative" ref={categoryDropdownRef}>
+                      <input
+                        type="text"
+                        value={categorySearch}
+                        onChange={(e) => {
+                          setCategorySearch(e.target.value);
+                          setShowCategoryDropdown(true);
+                        }}
+                        onFocus={() => setShowCategoryDropdown(true)}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                        placeholder="Tìm kiếm và chọn thể loại..."
+                      />
+
+                      {showCategoryDropdown && filteredCategories.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                          {filteredCategories.map((category) => (
+                            <button
+                              key={category.id}
+                              onClick={() => addCategory(category)}
+                              className="w-full px-4 py-2 text-left hover:bg-purple-50 hover:text-purple-700 transition-colors flex items-center justify-between group"
+                            >
+                              <span>{category.ten}</span>
+                              <PlusIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </button>
+                          ))}
+                        </div>
                       )}
                     </div>
                   </div>
-                  {currentMovie.type === 'single' && (
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Video (phim lẻ)</label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="file"
-                          accept="video/*"
-                          onChange={(e) => handleUploadSingleVideo(e.target.files?.[0])}
-                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        {currentMovie.video_url && (
-                          <span className="text-sm text-gray-600 truncate">{currentMovie.video_url}</span>
-                        )}
-                      </div>
-                    </div>
-                  )}
 
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Đạo diễn</label>
-                    <input
-                      type="text"
-                      value={currentMovie.daodien}
-                      onChange={(e) => setCurrentMovie({...currentMovie, daodien: e.target.value})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="https://example.com/poster.jpg"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tên tiếng anh</label>
-                    <input
-                      type="text"
-                      value={currentMovie.tentienganh}
-                      onChange={(e) => setCurrentMovie({...currentMovie, tentienganh: e.target.value})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="https://example.com/poster.jpg"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-                    <input
-                      type="text"
-                      value={currentMovie.mota}
-                      onChange={(e) => setCurrentMovie({...currentMovie, mota: e.target.value})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="https://example.com/poster.jpg"
-                    />
-                  </div>
-                </div>
-
-                {/* Genres from API */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Thể Loại</label>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {currentMovie.genres.map((genre, index) => (
-                      <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                        {genre}
-                        <button
-                          onClick={() => removeGenre(genre)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          <X size={14} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <select
-                      value={newGenre}
-                      onChange={(e) => setNewGenre(e.target.value)}
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Chọn thể loại</option>
-                      {categoryOptions
-                        .filter(c => c && !selectedCategoryIds.includes(c.id))
-                        .map((c) => (
-                          <option key={c.id} value={c.id}>{c.ten}</option>
-                        ))}
-                    </select>
-                    <button
-                      onClick={addGenre}
-                      
-                      disabled={!newGenre}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg transition-colors"
-                    >
-                      Thêm
-                    </button>
-                  </div>
-                </div>
-
-                {/* Actors from API */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Diễn Viên</label>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {currentMovie.actors.map((actor, index) => (
-                      <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                        {actor}
-                        <button
-                          onClick={() => removeActor(actor)}
-                          className="text-green-600 hover:text-green-800"
-                        >
-                          <X size={14} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <select
-                      value={newActor}
-                      onChange={(e) => setNewActor(e.target.value)}
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Chọn diễn viên</option>
-                      {actorOptions
-                        .filter(a => a && !selectedActorIds.includes(a.id))
-                        .map((a) => (
-                          <option key={a.id} value={a.id}>{a.ten}</option>
-                        ))}
-                    </select>
-                    <button
-                      onClick={addActor}
-                      disabled={!newActor}
-                      className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg transition-colors"
-                    >
-                      Thêm
-                    </button>
-                  </div>
-                </div>
-
-                {/* Episodes for Series */}
-                {currentMovie.type === 'series' && (
+                  {/* Actors Section */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Danh Sách Tập Phim</label>
-                    
-                    {/* Episode List */}
-                    {currentMovie.episodes.length > 0 && (
-                      <div className="mb-4 max-h-40 overflow-y-auto border border-gray-200 rounded-lg">
-                        <table className="w-full text-sm">
-                          <thead className="bg-gray-50 sticky top-0">
-                            <tr>
-                              <th className="px-3 py-2 text-left">Season</th>
-                              <th className="px-3 py-2 text-left">Tập</th>
-                              <th className="px-3 py-2 text-left">url VIDEO</th>
-                              <th className="px-3 py-2 text-left">Thời lượng</th>
-                              <th className="px-3 py-2"></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {currentMovie.episodes.map((episode, index) => (
-                              <tr key={index} className="border-t border-gray-200">
-                                <td className="px-3 py-2">{episode.season}</td>
-                                <td className="px-3 py-2">{episode.episode}</td>
-                                <td className="px-3 py-2">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-sm text-gray-700 truncate max-w-[200px]">{episode.title}</span>
-                                    <input
-                                      type="file"
-                                      accept="video/*"
-                                      onChange={(e) => handleUploadEpisodeVideo(e.target.files?.[0], episode.season, episode.episode)}
-                                      className="text-sm"
-                                    />
-                                  </div>
-                                </td>
-                                <td className="px-3 py-2">{episode.duration} phút</td>
-                                <td className="px-3 py-2">
-                                  <button
-                                    onClick={() => removeEpisode(episode.season, episode.episode)}
-                                    className="text-red-600 hover:text-red-800"
-                                  >
-                                    <X size={16} />
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <UserIcon className="inline h-4 w-4 mr-1" />
+                      Diễn viên
+                    </label>
+
+                    {/* Selected actors */}
+                    {currentMovie.actors.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {currentMovie.actors.map((actor) => (
+                          <span
+                            key={actor.id}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                          >
+                            {actor.ten}
+                            <button
+                              onClick={() => removeActor(actor.id)}
+                              className="hover:bg-blue-200 rounded-full p-0.5"
+                            >
+                              <XMarkIcon className="h-3.5 w-3.5" />
+                            </button>
+                          </span>
+                        ))}
                       </div>
                     )}
 
-                    {/* Add Episode Form */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                      <input
-                        type="number"
-                        min="1"
-                        value={newEpisode.season}
-                        onChange={(e) => setNewEpisode({...newEpisode, season: parseInt(e.target.value) || 1})}
-                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Season"
-                      />
-                      <input
-                        type="number"
-                        min="1"
-                        value={newEpisode.episode}
-                        onChange={(e) => setNewEpisode({...newEpisode, episode: parseInt(e.target.value) || 1})}
-                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Tập"
-                      />
+                    {/* Actor search dropdown */}
+                    <div className="relative" ref={actorDropdownRef}>
                       <input
                         type="text"
-                        value={newEpisode.title}
-                        onChange={(e) => setNewEpisode({...newEpisode, title: e.target.value})}
-                        className="md:col-span-2 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="URL tập phim"
+                        value={actorSearch}
+                        onChange={(e) => {
+                          setActorSearch(e.target.value);
+                          setShowActorDropdown(true);
+                        }}
+                        onFocus={() => setShowActorDropdown(true)}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                        placeholder="Tìm kiếm và chọn diễn viên..."
                       />
-                      <input
-                        type="number"
-                        min="0"
-                        value={newEpisode.duration}
-                        onChange={(e) => setNewEpisode({...newEpisode, duration: parseInt(e.target.value) || 0})}
-                        className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Phút"
-                      />
+
+                      {showActorDropdown && filteredActors.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                          {filteredActors.map((actor) => (
+                            <button
+                              key={actor.id}
+                              onClick={() => addActor(actor)}
+                              className="w-full px-4 py-2 text-left hover:bg-blue-50 hover:text-blue-700 transition-colors flex items-center justify-between group"
+                            >
+                              <span>{actor.ten}</span>
+                              <PlusIcon className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
+                  </div>
+
+                  {/* Upload Files */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <PhotoIcon className="inline h-4 w-4 mr-1" />
+                        Poster phim
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <label className="flex-1">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleUploadPoster(e.target.files?.[0])}
+                            className="hidden"
+                          />
+                          <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center cursor-pointer hover:border-purple-500 transition-colors">
+                            {uploadingPoster ? (
+                              <p className="text-gray-500">Đang tải lên...</p>
+                            ) : currentMovie.poster ? (
+                              <p className="text-green-600">✓ {currentMovie.poster}</p>
+                            ) : (
+                              <div>
+                                <CloudArrowUpIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                <p className="text-gray-500">Nhấn để chọn ảnh</p>
+                              </div>
+                            )}
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {currentMovie.type === 'single' && (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          <PlayCircleIcon className="inline h-4 w-4 mr-1" />
+                          Video phim
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <label className="flex-1">
+                            <input
+                              type="file"
+                              accept="video/*"
+                              onChange={(e) => handleUploadSingleVideo(e.target.files?.[0])}
+                              className="hidden"
+                            />
+                            <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center cursor-pointer hover:border-purple-500 transition-colors">
+                              {uploadingVideo ? (
+                                <p className="text-gray-500">Đang tải lên...</p>
+                              ) : currentMovie.video_url ? (
+                                <p className="text-green-600">✓ {currentMovie.video_url}</p>
+                              ) : (
+                                <div>
+                                  <CloudArrowUpIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                  <p className="text-gray-500">Nhấn để chọn video</p>
+                                </div>
+                              )}
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Mô tả
+                    </label>
+                    <textarea
+                      value={currentMovie.mota}
+                      onChange={(e) => setCurrentMovie({ ...currentMovie, mota: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none resize-none"
+                      rows="4"
+                      placeholder="Nhập mô tả phim..."
+                    />
+                  </div>
+                </div>
+              ) : (
+                /* Episodes Tab */
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">Danh sách tập phim</h3>
                     <button
                       onClick={addEpisode}
-                      disabled={!newEpisode.title.trim()}
-                      className="mt-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
                     >
-                      Thêm Tập
+                      <PlusIcon className="h-4 w-4" />
+                      <span>Thêm tập</span>
                     </button>
                   </div>
-                )}
-              </div>
 
-              {/* Footer */}
-              <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t">
-                <button
-                  onClick={closeModal}
-                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={handleSaveMovie}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors"
-                >
-                  <Save size={16} />
-                  {editingMovie ? 'Cập Nhật' : 'Thêm Phim'}
-                </button>
-              </div>
+                  <div className="space-y-3">
+                    {currentMovie.episodes.length === 0 ? (
+                      <div className="text-center py-8 bg-gray-50 rounded-xl">
+                        <PlayIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                        <p className="text-gray-500">Chưa có tập phim nào</p>
+                        <p className="text-gray-400 text-sm mt-1">Nhấn "Thêm tập" để bắt đầu</p>
+                      </div>
+                    ) : (
+                      currentMovie.episodes.map((episode) => (
+                        <div key={episode.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                          <div className="flex items-center gap-4">
+                            <div className="flex-shrink-0">
+                              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold">
+                                {episode.episode}
+                              </span>
+                            </div>
+
+                            <div className="flex-1">
+                              <label className="block text-xs font-medium text-gray-600 mb-1">Video tập {episode.episode}</label>
+                              <div className="flex items-center gap-2">
+                                <label className="flex-1">
+                                  <input
+                                    type="file"
+                                    accept="video/*"
+                                    onChange={(e) => handleUploadEpisodeVideo(e.target.files?.[0], episode.id)}
+                                    className="hidden"
+                                  />
+                                  <div className="border border-gray-300 rounded-lg px-3 py-2 cursor-pointer hover:border-purple-500 transition-colors">
+                                    {episode.video_url ? (
+                                      <span className="text-green-600 text-sm">✓ {episode.video_url}</span>
+                                    ) : (
+                                      <span className="text-gray-400 text-sm">Chọn video...</span>
+                                    )}
+                                  </div>
+                                </label>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => removeEpisode(episode.id)}
+                              className="flex-shrink-0 p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end space-x-3">
+              <button
+                onClick={closeModal}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSaveMovie}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+              >
+                {editingMovie ? 'Cập Nhật' : 'Thêm Mới'}
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

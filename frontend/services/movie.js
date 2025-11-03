@@ -20,10 +20,24 @@ export const getMovieCountry = async (country) => {
   const res = await api.get(`/phim/quocgia/${country}`);
   return res.data;
 };
-export const getMovieNEW= async () => {
+export const getMovieNEW = async () => {
   const res = await api.get(`/phim/new`);
   return res.data;
 };
+export const filterMovie = async (quocgia, theloai_id, loai, nam) => {
+  let url = "/phim/loc";
+
+  url += `?quocgia=${encodeURIComponent(quocgia)}&theloai_id=${encodeURIComponent(theloai_id)}&loai=${encodeURIComponent(loai)}&nam=${encodeURIComponent(nam)}`;
+
+
+  const res = await api.get(url);
+  return res.data;
+};
+export const SearchMovie = async(movie, page_number) => {
+  let url =`/phim/search?key=${movie}&page_size=20&page_number=${page_number}`
+  const res = await api.get(url);
+  return res.data;
+}
 
 
 // export const CreateMovie = async (data) => {

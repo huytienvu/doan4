@@ -19,6 +19,15 @@ const getbyid = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const GetPhimdienvien = async (req, res) => {
+  try {
+    const id = req.params.id
+    const data = await dienvien.GetPhimdienvien(id);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 const create = async (req, res) => {
   try {
     const data = req.body;
@@ -48,11 +57,22 @@ const deletedienvien = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const Searchdienvien = async (req, res) => {
+  try {
+    const {key,page_number,page_size } = req.query;
+    const result = await dienvien.Search(key,page_number,page_size);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 module.exports = {
   getAll,
   getbyid,
+  GetPhimdienvien,
   create,
   update,
-  deletedienvien
+  deletedienvien,
+  Searchdienvien
 };

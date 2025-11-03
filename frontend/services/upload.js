@@ -25,3 +25,16 @@ export const APIUploadVideo = async (file) => {
   });
   return res.data;
 };
+
+export const APIUploadActor = async (file) => {
+  const formData = new FormData();
+  formData.append('actor', file); // field name phải khớp với multer.single('video')
+
+  const res = await api.post('/upload/dienvien', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return res.data;
+};
+
