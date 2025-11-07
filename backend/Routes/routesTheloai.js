@@ -5,7 +5,7 @@ const { authenticate,role } = require('../middleware/auth');
 const router = express.Router();
 
 // Thể loại: cho phép cả 'user' và 'admin'
-router.get('/', theloaiController.getAll);
+router.get('/', theloaiController.getAllUser);
 router.get('/:id',  theloaiController.getbyid);
 router.post('/', authenticate, role(['User', 'Admin']), theloaiController.create);
 router.put('/:id', authenticate, role(['User', 'Admin']), theloaiController.update);

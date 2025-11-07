@@ -2,6 +2,14 @@ const Quocgia = require('../Model/quocgia');
 
 const quocgia = new Quocgia();
 
+const getAllUser = async (req, res) => {
+  try {
+    const data = await quocgia.getAllUser();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 const getAll = async (req, res) => {
   try {
     const data = await quocgia.getAll();
@@ -41,6 +49,7 @@ const update = async (req, res) => {
 
 module.exports = {
   getAll,
+  getAllUser,
   getbyid,
   create,
   update

@@ -8,16 +8,16 @@ export const getMoviebyId = async (id) => {
   const res = await api.get(`/phim/${id}`);
   return res.data;
 };
-export const getMovieCategory = async (id) => {
-  const res = await api.get(`/phim/category/${id}`);
+export const getMovieCategory = async (id,page_number) => {
+  const res = await api.get(`/phim/category?id=${id}&page_number=${page_number}&page_size=24`);
   return res.data;
 };
-export const getMovieLoai = async (loai) => {
-  const res = await api.get(`/phim/loai/${loai}`);
+export const getMovieLoai = async (loai,page_number) => {
+  const res = await api.get(`/phim/loai?loai=${loai}&page_number=${page_number}&page_size=5`);
   return res.data;
 };
-export const getMovieCountry = async (country) => {
-  const res = await api.get(`/phim/quocgia/${country}`);
+export const getMovieCountry = async (country,page_number) => {
+  const res = await api.get(`/phim/quocgia?quocgia=${country}&page_number=${page_number}&page_size=24`);
   return res.data;
 };
 export const getMovieNEW = async () => {

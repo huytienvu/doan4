@@ -16,6 +16,7 @@ const danhgiaRoutes =require('./Routes/routesDanhgia')
 
 const phimAdminROutes =require('./Routes/admin/routesAdminPhim');
 const theloaiAdminRoutes = require('./Routes/admin/routesAdminTheloai')
+const quocgiaAdminRoutes = require('./Routes/admin/routesAdminQuocgia')
 const thongkeAdminRoutes = require('./Routes/admin/routesAdminThongke')
 const app = express();
 const path = require('path');
@@ -41,6 +42,7 @@ app.use('/api/danhgia',danhgiaRoutes);
 app.use('/api/admin/phim',phimAdminROutes);
 app.use('/api/admin/theloai',theloaiAdminRoutes)
 app.use('/api/admin/thongke',thongkeAdminRoutes)
+app.use('/api/admin/quocgia',quocgiaAdminRoutes)
 
 const PORT = process.env.PORT || 5273;
 const HOST = "0.0.0.0";

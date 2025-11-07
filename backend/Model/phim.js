@@ -18,37 +18,74 @@ class Phim {
       throw error;
     }
   }
-  async getPhimBoLe(loai) {
+  async getPhimBoLe(loai,page_number = 1, page_size = 24) {
     try {
-      const phim = await query('SELECT * FROM phim where loai = ?', [loai]);
+      const offset = (page_number - 1) * page_size;
+      const countResult = await query(
+        `SELECT COUNT(*) AS total FROM phim WHERE loai = ?`,
+        [loai]
+      );
+      const total_items = countResult[0].total;
+      const total_pages = Math.ceil(total_items / page_size);
+
+      const phim = await query(`SELECT * FROM phim where loai = ? LIMIT ${page_size} OFFSET ${offset}`, [loai]);
       for (const p of phim) {
         const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [p.id]);
         p.theloai = theloai;
         const dienvien = await query('SELECT id,ten FROM dien_vien d LEFT JOIN phim_dien_vien p on p.dien_vien_id=d.id WHERE p.phim_id=?', [p.id])
         p.dienvien = dienvien
       }
-      return phim;
+      return {
+        page_number,
+        page_size,
+        total_pages,
+        phim
+      }
     } catch (error) {
       throw error;
     }
   }
-  async getPhimquocgia(quocgia) {
+  async getPhimquocgia(quocgia,page_number = 1, page_size = 20) {
     try {
-      const phim = await query('SELECT * FROM phim where quocgia = ?', [quocgia]);
+      const offset = (page_number - 1) * page_size;
+
+      const countResult = await query(
+        `SELECT COUNT(*) AS total FROM phim WHERE quocgia = ?`,
+        [quocgia]
+      );
+      const total_items = countResult[0].total;
+      const total_pages = Math.ceil(total_items / page_size);
+
+      const phim = await query(`SELECT * FROM phim where quocgia = ? LIMIT ${page_size} OFFSET ${offset}`, [quocgia]);
       for (const p of phim) {
         const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [p.id]);
         p.theloai = theloai;
         const dienvien = await query('SELECT id,ten FROM dien_vien d LEFT JOIN phim_dien_vien p on p.dien_vien_id=d.id WHERE p.phim_id=?', [p.id])
         p.dienvien = dienvien
       }
-      return phim;
+      return {
+        page_number,
+        page_size,
+        total_pages,
+        phim
+        
+      }
     } catch (error) {
       throw error;
     }
   }
-  async getAllPhimdanhmuc(id) {
+  async getAllPhimdanhmuc(id, page_number = 1, page_size = 20) {
     try {
-      const phim = await query('SELECT id,ten, p.ten_tieng_anh,p.mota,p.anh_dai_dien,p.daodien,p.quocgia,p.ngay_phat_hanh,p.trang_thai,p.loai,p.thoi_luong,p.video_url,p.created_at FROM phim p INNER JOIN phim_theloai ptl on ptl.phim_id=p.id WHERE ptl.theloai_id=? GROUP by p.ten', [id]);
+      const offset = (page_number - 1) * page_size;
+
+      const countResult = await query(
+        `SELECT COUNT(*) AS total FROM phim p INNER join phim_theloai ptl on ptl.phim_id= p.id WHERE  ptl.theloai_id = ?`,
+        [id]
+      );
+      const total_items = countResult[0].total;
+      const total_pages = Math.ceil(total_items / page_size);
+
+      const phim = await query(`SELECT id,ten, p.ten_tieng_anh,p.mota,p.anh_dai_dien,p.daodien,p.quocgia,p.ngay_phat_hanh,p.trang_thai,p.loai,p.thoi_luong,p.video_url,p.created_at FROM phim p INNER JOIN phim_theloai ptl on ptl.phim_id=p.id WHERE ptl.theloai_id=? GROUP by p.ten LIMIT ${page_size} OFFSET ${offset}`, [id]);
       for (const p of phim) {
         const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [p.id]);
         p.theloai = theloai;
@@ -58,8 +95,14 @@ class Phim {
       const theloai = await query('SELECT * FROM `theloai` WHERE id =?', [id])
 
       return {
-        theloai,
-        phim
+        page_number,
+        page_size,
+        total_pages,
+        data: {
+          theloai,
+          phim
+        }
+
       }
     } catch (error) {
       throw error;
@@ -97,7 +140,7 @@ WHERE pdv.dien_vien_id = ?`, [id]);
       phim[0].danhgia = rows[0];
       const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [id]);
       phim[0].theloai = theloai;
-      const dienvien = await query('SELECT id,ten FROM dien_vien d LEFT JOIN phim_dien_vien p on p.dien_vien_id=d.id WHERE p.phim_id=?', [id])
+      const dienvien = await query('SELECT id,ten,anh FROM dien_vien d LEFT JOIN phim_dien_vien p on p.dien_vien_id=d.id WHERE p.phim_id=?', [id])
       phim[0].dienvien = dienvien
 
       const tapphim = await query('SELECT t.phim_id,t.id,t.so_tap,t.video_url from `tap_phim` t WHERE t.phim_id=?', [id]);

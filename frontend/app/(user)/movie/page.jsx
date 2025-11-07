@@ -13,7 +13,7 @@ import CommentBox from '@/components/user/Comments/comments';
 import { addRatingMovie, CheckRatingMovie } from '@/services/rating';
 
 // Rating Modal Component
-const RatingModal = ({ isOpen, onClose, movieTitle,onRatingSuccess }) => {
+const RatingModal = ({ isOpen, onClose, movieTitle, onRatingSuccess }) => {
     const [selectedRating, setSelectedRating] = useState(null);
     const [reviewText, setReviewText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,40 +25,40 @@ const RatingModal = ({ isOpen, onClose, movieTitle,onRatingSuccess }) => {
         { value: 4, emoji: '😴', label: 'Phim chán', color: 'from-orange-500 to-red-500' },
         { value: 2, emoji: '🤮', label: 'Dở tệ', color: 'from-red-600 to-red-800' }
     ];
-    
-  const paramsId = useSearchParams();
-  const idMovie = paramsId.get('id');
+
+    const paramsId = useSearchParams();
+    const idMovie = paramsId.get('id');
 
     const handleSubmit = async () => {
         if (!selectedRating) {
             toast.error('Vui lòng chọn mức đánh giá');
             return;
         }
-        if(Getiduser() === null){
+        if (Getiduser() === null) {
             toast.error("Bạn phải đăng nhập để sử dụng tính năng này")
             return;
         }
-        
+
         const check = await CheckRatingMovie(
             {
-                "user_id":Getiduser(),
+                "user_id": Getiduser(),
                 "phim_id": idMovie
             }
         )
-        if(check){
+        if (check) {
             toast.error("Ban da danh gia")
             return;
         }
         setIsSubmitting(true);
         // Simulate API call
-        setTimeout( async () => {
-            
-            await addRatingMovie (
+        setTimeout(async () => {
+
+            await addRatingMovie(
                 {
                     "user_id": Getiduser(),
-                    "phim_id":idMovie,
+                    "phim_id": idMovie,
                     "diem": selectedRating,
-                    "danhgia":reviewText
+                    "danhgia": reviewText
                 }
             )
             if (onRatingSuccess) {
@@ -166,8 +166,8 @@ const RatingModal = ({ isOpen, onClose, movieTitle,onRatingSuccess }) => {
                             onClick={handleSubmit}
                             disabled={!selectedRating || isSubmitting}
                             className={`flex-1 font-semibold py-3 px-6 rounded-xl transition-all duration-300 ${selectedRating
-                                    ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white transform hover:scale-105 shadow-lg'
-                                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white transform hover:scale-105 shadow-lg'
+                                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
                                 }`}
                         >
                             {isSubmitting ? (
@@ -210,14 +210,14 @@ const MovieDetail = () => {
         setLiked(res);
     }
 
-    useEffect(() => { 
+    useEffect(() => {
         fetdata();
     }, [idMovie])
 
     const handleRatingSuccess = async () => {
         // Force refresh CommentBox bằng cách thay đổi key
         setRefreshKey(prev => prev + 1);
-        
+
         // Cập nhật lại thông tin phim để có điểm đánh giá mới
         const updatedMovie = await getMoviebyId(idMovie);
         setmoview(updatedMovie);
@@ -403,7 +403,7 @@ const MovieDetail = () => {
                             </div>
                             <div>
                                 <span className="text-gray-500 text-sm">Thời lượng</span>
-                                <p className="text-white font-medium">{movie?.thoi_luong}</p>
+                                <p className="text-white font-medium">{movie?.thoi_luong || "Đang update"}</p>
                             </div>
                         </div>
 
@@ -443,26 +443,114 @@ const MovieDetail = () => {
                             </div>
                         </div>
 
-                        <div className="col-span-full">
-                            <div className="flex items-start gap-3">
-                                <div className="p-2 bg-gray-800 rounded-lg mt-1">
-                                    <User className="w-5 h-5 text-cyan-500" />
+
+                    </div>
+                </div>
+                {/* dien vien */}
+                <div className="bg-gray-900/50 backdrop-blur rounded-2xl p-8 mb-8 border border-gray-800">
+                    <div className="mb-6">
+                        <h3 className="text-xl font-bold text-white mb-1">Dàn Diễn Viên</h3>
+                        <div className="h-1 w-20 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
+                    </div>
+
+                    {/* Cast Grid */}
+                    <div className="relative">
+                        {/* Scroll Container */}
+                        <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                            {movie?.dienvien?.map((dv, index) => (
+                                <div
+                                    key={dv.id}
+                                    onClick={() => router.push(`/actor/${dv.id}`)}
+                                    className="flex-shrink-0 group cursor-pointer transform transition-all duration-300 hover:scale-105"
+                                >
+                                    {/* Actor Card */}
+                                    <div className="text-center w-28 md:w-32">
+                                        {/* Avatar Container */}
+                                        <div className="relative mb-3">
+                                            <div className="relative w-24 h-24 md:w-28 md:h-28 mx-auto">
+                                                {/* Glow Effect on Hover */}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-full opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300"></div>
+
+                                                {/* Avatar Image */}
+                                                <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-gray-700 group-hover:border-red-500 transition-colors duration-300">
+                                                    {dv.anh ? (
+                                                        <img
+                                                            src={dv.anh}
+                                                            alt={dv.ten}
+                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                                            onError={(e) => {
+                                                                e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(dv.ten) + '&background=1f2937&color=fff&size=200';
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                                            <svg className="w-12 h-12 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                            </svg>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Online/Active Indicator (optional) */}
+                                                {index === 0 && (
+                                                    <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+                                                        Chính
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Actor Name */}
+                                        <p className="text-white font-medium text-sm group-hover:text-red-400 transition-colors duration-300 line-clamp-2">
+                                            {dv.ten}
+                                        </p>
+
+                                        {/* Role (if available) */}
+                                        {dv.vaitro && (
+                                            <p className="text-gray-500 text-xs mt-1 line-clamp-1">
+                                                {dv.vaitro}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <span className="text-gray-500 text-sm">Diễn viên</span>
-                                    <p className="text-white font-medium">
-                                        {movie?.dienvien?.map((dv, index) => (
-                                            <span onClick={() => router.push(`/actor/${dv.id}`)} key={index} className="inline-block hover: cursor-pointer mr-2 mb-2 px-3 py-1 bg-gray-800 rounded-lg text-sm">
-                                                {dv.ten}
-                                            </span>
-                                        ))}
-                                    </p>
+                            ))}
+
+                            {/* View More Button (if many actors) */}
+                            {movie?.dienvien?.length > 8 && (
+                                <div className="flex-shrink-0 flex items-center">
+                                    <button
+                                        onClick={() => router.push(`/movie/${movie.id}/cast`)}
+                                        className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-800/50 border-2 border-gray-700 hover:border-red-500 flex flex-col items-center justify-center group transition-all duration-300 hover:scale-105"
+                                    >
+                                        <svg className="w-8 h-8 text-gray-400 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                        </svg>
+                                        <span className="text-gray-400 group-hover:text-red-400 text-xs mt-1 transition-colors">Xem thêm</span>
+                                    </button>
                                 </div>
-                            </div>
+                            )}
                         </div>
+
+                        {/* Gradient Fade Edges */}
+                        {movie?.dienvien?.length > 5 && (
+                            <>
+                                <div className="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-gray-900 to-transparent pointer-events-none"></div>
+                                <div className="absolute right-0 top-0 bottom-4 w-8 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none"></div>
+                            </>
+                        )}
                     </div>
                 </div>
 
+                {/* CSS cho scrollbar ẩn */}
+                <style jsx>{`
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+`}</style>
                 {/* Description */}
                 <div className="bg-gray-900/50 backdrop-blur rounded-2xl p-8 mb-8 border border-gray-800">
                     <h3 className="text-2xl font-bold mb-4">Nội dung phim</h3>

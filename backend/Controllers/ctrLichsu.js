@@ -29,19 +29,19 @@ const create = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-// const deleted = async (req, res) => {
-//   try {
+const deleted = async (req, res) => {
+  try {
     
-//     const { user_id, phim_id } = req.query;
-//     const result = await yeuthich.deleted(user_id,phim_id);
-//     res.status(201).json({message : "Xóa yêu thích thành công"});
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
+    const { user_id, phim_id } = req.query;
+    const result = await lichsu.deleted(user_id,phim_id);
+    res.status(201).json({message : "Xóa lịch sử thành công"});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 module.exports = {
 getbyUser,
 create,
 // check,
-// deleted
+deleted
 };

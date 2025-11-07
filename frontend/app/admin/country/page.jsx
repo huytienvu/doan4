@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon, FilmIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { getCategory, CreateMovie, UpdateMovie, DeleteCategory } from '@/services/admin/category';
-import { createCountry, getAllCountry, updateCountry } from '@/services/quocgia';
+import { createCountry, getAllCountry, updateCountry } from '@/services/admin/quocgia';
+
 
 export default function CategoryManagement() {
   const [categories, setCategories] = useState([]);

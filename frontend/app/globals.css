@@ -29,3 +29,80 @@ body {
 .page-container {
   padding-top: 5rem; /* 80px cho mobile */
 }
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  justify-content: center; 
+  margin-top: 20px;
+  gap: 8px; /* Thêm gap thay vì margin cho các item */
+}
+
+.page-num {
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid #374151; /* gray-700 */
+  border-radius: 6px;
+  cursor: pointer;
+  color: #9CA3AF; /* gray-400 */
+  text-decoration: none;
+  background-color: #1F2937; /* gray-800 */
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.page-num:hover {
+  background-color: #374151; /* gray-700 */
+  color: #60A5FA; /* blue-400 */
+  border-color: #3B82F6; /* blue-500 */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); /* shadow xanh nhẹ */
+}
+
+.pagination .active {
+  background-color: #2563EB; /* blue-600 */
+  color: white;
+  border-color: #2563EB; /* blue-600 */
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.5); /* shadow xanh */
+}
+
+.pagination .active:hover {
+  background-color: #1D4ED8; /* blue-700 */
+  border-color: #1D4ED8;
+}
+
+.pagination .disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: #111827; /* gray-900 */
+  color: #4B5563; /* gray-600 */
+  border-color: #1F2937; /* gray-800 */
+}
+
+.pagination .disabled:hover {
+  background-color: #111827; /* gray-900 - không đổi khi hover */
+  color: #4B5563; /* gray-600 - không đổi khi hover */
+  border-color: #1F2937; /* gray-800 - không đổi khi hover */
+  transform: none;
+  box-shadow: none;
+}
+
+/* Thêm style cho break (dấu ...) */
+.pagination .break {
+  padding: 8px 12px;
+  color: #6B7280; /* gray-500 */
+  cursor: default;
+}
+
+/* Responsive cho mobile */
+@media (max-width: 640px) {
+  .page-num {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  .pagination {
+    gap: 4px;
+  }
+}

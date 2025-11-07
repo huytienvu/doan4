@@ -20,11 +20,11 @@ export default function Home() {
     const fetchdata = async () => {
         try {
             const res = await getHistoryUser(Getiduser());
-            const abc = await getMovieLoai('le')
-            const resBo = await getMovieLoai('bo')
+            const resLe = await getMovieLoai('le',1)
+            const resBo = await getMovieLoai('bo',1)
 
-            setMovieLe(abc)
-            setMovieBo(resBo)
+            setMovieLe(resLe.phim)
+            setMovieBo(resBo.phim)
 
             setMovie((res || []).slice(0, 8));
         } catch (error) {

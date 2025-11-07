@@ -5,8 +5,11 @@ const helper = require('../config/helper');
 const query = util.promisify(db.query).bind(db);
 
 class Quocgia {
+  async getAllUser() {
+    return await helper(`SELECT * FROM quocgia WHERE status=N'Hiển thị'`);
+  }
   async getAll() {
-    return await helper('SELECT * FROM quocgia');
+    return await helper(`SELECT * FROM quocgia`);
   }
 
   async getbyid(id) {

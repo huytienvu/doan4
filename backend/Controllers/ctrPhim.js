@@ -12,8 +12,8 @@ const getAllPhim = async (req, res) => {
 };
 const getPhimBoLe = async (req, res) => {
   try {
-    const bole= req.params.bole;
-    const data = await phim.getPhimBoLe(bole);
+    const { loai, page_number, page_size } = req.query;
+    const data = await phim.getPhimBoLe(loai,page_number,page_size);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -21,8 +21,8 @@ const getPhimBoLe = async (req, res) => {
 };
 const getPhimQuocgia = async (req, res) => {
   try {
-    const quocgia= req.params.quocgia;
-    const data = await phim.getPhimquocgia(quocgia);
+    const { quocgia, page_number, page_size } = req.query;
+    const data = await phim.getPhimquocgia(quocgia, page_number, page_size);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -30,8 +30,8 @@ const getPhimQuocgia = async (req, res) => {
 };
 const getAllPhimdanhmuc = async (req, res) => {
   try {
-    const id = req.params.id
-    const data = await phim.getAllPhimdanhmuc(id);
+    const { id, page_number, page_size } = req.query;
+    const data = await phim.getAllPhimdanhmuc(id, page_number, page_size);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -56,7 +56,7 @@ const getPhimbyid = async (req, res) => {
 };
 const getTapPhim = async (req, res) => {
   try {
-    const id=req.params.phim_id
+    const id = req.params.phim_id
     const data = await phim.getTapPhim(id);
     res.json(data);
   } catch (error) {
@@ -83,8 +83,8 @@ const LocPhim = async (req, res) => {
 };
 const SearchPhim = async (req, res) => {
   try {
-    const { key,page_number, page_size } = req.query;
-    const data = await phim.SearchPhim(key,page_number,page_size);
+    const { key, page_number, page_size } = req.query;
+    const data = await phim.SearchPhim(key, page_number, page_size);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -94,17 +94,17 @@ const create = async (req, res) => {
   try {
     const data = req.body;
     const result = await phim.create(data);
-    res.status(201).json({message : "Thêm phim thành công"});
+    res.status(201).json({ message: "Thêm phim thành công" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 const update = async (req, res) => {
   try {
-    const id=req.params.id;
+    const id = req.params.id;
     const data = req.body;
-    const result = await phim.update(id,data);
-    res.status(201).json({message : "Sửa phim thành công"});
+    const result = await phim.update(id, data);
+    res.status(201).json({ message: "Sửa phim thành công" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

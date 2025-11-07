@@ -1,6 +1,6 @@
 "use client";
 import { IMAGE_URL } from "@/config/config";
-import { getFavoriteUser } from "@/services/favorite";
+import { deleteFavorite, getFavoriteUser } from "@/services/favorite";
 import { Getiduser, getRole } from "@/utils/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,13 +14,17 @@ export default function Favorite() {
     try {
       const res = await getFavoriteUser(Getiduser());
       setMovie(res || []);
-      
+
     } catch (error) {
       console.error("Lỗi khi load danh sách yêu thích:", error);
     } finally {
       setLoading(false);
     }
   };
+  const abc = async (id) => {
+    await deleteFavorite(Getiduser(),id)
+    fetchdata();
+  }
 
   useEffect(() => {
     fetchdata();
@@ -67,16 +71,26 @@ export default function Favorite() {
             {movie.map((m) => (
               <div
                 key={m.id}
-                className="group bg-gray-900 rounded-lg overflow-hidden border border-gray-800 hover:border-red-600 hover:shadow-[0_0_15px_rgba(255,0,0,0.3)] transition-all duration-300 cursor-pointer"
-                onClick={() => router.push(`/movie?id=${m.id}`)}
+                className="relative group bg-gray-900 rounded-lg overflow-hidden border border-gray-800 hover:border-red-600 hover:shadow-[0_0_15px_rgba(255,0,0,0.3)] transition-all duration-300 cursor-pointer"
+                
               >
-                <div className="relative overflow-hidden aspect-[3/4]">
+                <div className="relative overflow-hidden aspect-[3/4]" onClick={() => router.push(`/movie?id=${m.id}`)}>
                   <img
                     src={`${IMAGE_URL}/${m.anh_dai_dien}`}
                     alt={m.ten}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <div className="absolute top-2 left-2">
+                  <span className="px-2 py-1 bg-red-600/90 backdrop-blur-sm text-white text-xs font-bold rounded">
+                    HD
+                  </span>
+                </div>
+                <div className="absolute top-2 right-2" onClick={() => abc(m.id)}>
+                  <span className="px-2 py-1 bg-white backdrop-blur-sm text-black text-xs font-bold rounded-2xl">
+                    X
+                  </span>
                 </div>
 
                 <div className="p-3">

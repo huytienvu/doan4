@@ -63,7 +63,7 @@ class Lichsu {
     try {
       // 1. Insert phim
       const result = await query(
-        `DELETE FROM yeuthich where user_id= ? and phim_id= ?`,
+        `DELETE FROM lich_su_xem where user_id= ? and phim_id= ?`,
         [user_id, phim_id]
       );
 

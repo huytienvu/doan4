@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Play, Star, Calendar, Clock, Eye, Heart, Share2, Download, ChevronRight } from 'lucide-react';
+import { Play, Star, Calendar, Clock, Eye, Heart, Share2, Download, ChevronRight, Film, Globe, User } from 'lucide-react';
 import { getMoviebyId } from '@/services/movie';
 import { IMAGE_URL } from '@/config/config';
 import { useSearchParams } from 'next/navigation';
@@ -8,11 +8,16 @@ import { useRouter } from 'next/navigation';
 import { createHistory } from '@/services/history';
 import { Getiduser } from '@/utils/auth';
 import CommentBox from '@/components/user/Comments/comments';
+import { checkFavorite, createFavorite, deleteFavorite } from '@/services/favorite';
+import { toast } from 'react-toastify';
+import { FaShare } from 'react-icons/fa';
+import { AiFillStar } from 'react-icons/ai';
 
 
 const MovieWatchPage = () => {
   const [currentEpisode, setCurrentEpisode] = useState(1);
   const [activeTab, setActiveTab] = useState('');
+  const [liked, setLiked] = useState(false);
   const router = useRouter();
 
   // Dữ liệu phim mẫu
@@ -99,13 +104,36 @@ const MovieWatchPage = () => {
       setCurrentEpisode(selectedEp.id);
     }
 
+    const objCheck = {
+      user_id: Getiduser(),
+      phim_id: idMovie
+    }
+    const res = await checkFavorite(objCheck);
+    setLiked(res);
 
 
+
+  }
+  async function toggleFavorite() {
+    if (Getiduser() === null) {
+      toast.error("Bạn phải đăng nhập để sử dụng tính năng này")
+      return;
+    }
+    if (liked) {
+      await deleteFavorite(Getiduser(), idMovie);
+      setLiked(false);
+    } else {
+      await createFavorite({
+        "user_id": Getiduser(),
+        "phim_id": idMovie
+      });
+      setLiked(true);
+    }
   }
   const res = async () => {
-    
+
   }
-  
+
   useEffect(() => {
     fetdata();
     res()
@@ -120,7 +148,7 @@ const MovieWatchPage = () => {
     }
   }, [loai]);
   return (
-    <div className="min-h-screen bg-black text-gray-100" onClick={ async()=> {
+    <div className="min-h-screen bg-black text-gray-100" onClick={async () => {
       await createHistory(
         {
           user_id: Getiduser(),
@@ -130,8 +158,8 @@ const MovieWatchPage = () => {
       )
     }}>
       {/* Video Player */}
-      
-      <video controls width={1500}  className='max-w-7xl mx-auto px-4 py-8' src={`http://localhost:5273/upload/video/${videourl}`}></video>
+
+      <video controls width={1500} className='max-w-7xl mx-auto px-4 py-8' src={`http://localhost:5273/upload/video/${videourl}`}></video>
       {/* <div className="relative w-full bg-gray-900 aspect-video">
         <img
           src={movieData.coverImage}
@@ -171,36 +199,54 @@ const MovieWatchPage = () => {
                   <p className="text-gray-400 mb-4">{movie?.ten_tieng_anh}</p>
 
                   <div className="flex flex-wrap gap-4 mb-4">
-                    {/* <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                      <span className="text-white font-semibold">100</span>
-                    </div> */}
+                      <span className="text-white font-semibold">{movie?.danhgia?.diem_tb || 0} / 10 </span>
+                    </div>
                     <div className="flex items-center gap-2 text-gray-400">
                       <Calendar className="w-5 h-5" />
                       <span>{movie.ngay_phat_hanh}</span>
                     </div>
-                    {/* <div className="flex items-center gap-2 text-gray-400">
+                    <div className="flex items-center gap-2 text-gray-400">
                       <Clock className="w-5 h-5" />
-                      <span>{movieData.duration}</span>
-                    </div> */}
-                    {/* <div className="flex items-center gap-2 text-gray-400">
-                      <Eye className="w-5 h-5" />
-                      <span>{movieData.views}</span>
-                    </div> */}
+                      <span>45 phút</span>
+                    </div>
+                    
                   </div>
 
-                  <div className="flex gap-2 mb-4">
-                    <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
-                      <Heart className="w-4 h-4" />
-                      Yêu thích
+                  <div className="flex items-center gap-4 mb-8 flex-wrap">
+                    <button
+                      onClick={toggleFavorite}
+                      className="group relative"
+                    >
+                      <div className={`
+                                              flex items-center gap-2 px-5 py-3 rounded-xl transition-all duration-300
+                                              ${liked
+                          ? 'bg-red-500/20 border-2 border-red-500'
+                          : 'bg-gray-800/50 border-2 border-gray-700 hover:border-gray-600'
+                        }
+                                          `}>
+                        <Heart
+                          className={`w-5 h-5 transition-all duration-300 ${liked ? "fill-red-500 text-red-500" : "text-gray-400 group-hover:text-red-500"
+                            }`}
+                        />
+                        <span className={`font-medium ${liked ? 'text-red-500' : 'text-gray-400'}`}>
+                          {liked ? 'Đã thích' : 'Yêu thích'}
+                        </span>
+                      </div>
                     </button>
-                    <button className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2">
-                      <Share2 className="w-4 h-4" />
+
+                    <button className="flex items-center gap-2 bg-gray-800/50 backdrop-blur hover:bg-gray-700 text-gray-300 font-medium py-3 px-5 rounded-xl transition-all duration-300 border-2 border-gray-700 hover:border-gray-600">
+                      <FaShare />
                       Chia sẻ
                     </button>
-                    <button className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2">
-                      <Download className="w-4 h-4" />
-                      Tải xuống
+
+                    <button
+                      // onClick={() => setIsRatingModalOpen(true)}
+                      className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    >
+                      <AiFillStar />
+                      Đánh giá
                     </button>
                   </div>
                 </div>
@@ -258,57 +304,190 @@ const MovieWatchPage = () => {
               {activeTab === 'info' && (
                 <div className="space-y-6">
                   {/* Description */}
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-3">Nội dung</h3>
-                    <p className="text-gray-400 leading-relaxed">{movie.mota}</p>
-                  </div>
 
-                  {/* Details */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-gray-500 text-sm mb-1">Quốc gia</h4>
-                      <p className="text-white">{movie.quocgia}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-gray-500 text-sm mb-1">Đạo diễn</h4>
-                      <p className="text-white">{movie.daodien}</p>
-                    </div>
-                  </div>
 
-                  {/* Genres */}
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-3">Thể loại</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {movie.theloai.map((theloai, index) => (
-                        <span
-                          key={index}
-                          className="px-4 py-2 bg-gray-800 text-gray-300 rounded-full text-sm border border-gray-700 hover:border-red-600 hover:text-red-600 transition-colors cursor-pointer"
-                        >
-                          {theloai.ten}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  <div className="bg-gray-900/50 backdrop-blur rounded-2xl p-8 mb-8 border border-gray-800">
+                    <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                      <Film className="text-red-500" />
+                      Thông tin phim
+                    </h3>
 
-                  {/* Cast */}
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-4">Diễn viên</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {movie.dienvien.map((dienvien, index) => (
-                        <div key={index} className="flex items-center gap-3 bg-gray-800 p-3 rounded-lg border border-gray-700 hover:border-red-600 transition-colors cursor-pointer">
-                          {/* <img
-                            src={actor.image}
-                            alt={actor.name}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-gray-700"
-                          /> */}
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-white font-semibold text-sm truncate">{dienvien.ten}</h4>
-                            {/* <p className="text-gray-400 text-xs truncate">{actor.role}</p> */}
-                          </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-800 rounded-lg">
+                          <Calendar className="w-5 h-5 text-red-500" />
                         </div>
-                      ))}
+                        <div>
+                          <span className="text-gray-500 text-sm">Năm phát hành</span>
+                          <p className="text-white font-medium">{movie?.ngay_phat_hanh}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-800 rounded-lg">
+                          <Globe className="w-5 h-5 text-blue-500" />
+                        </div>
+                        <div>
+                          <span className="text-gray-500 text-sm">Quốc gia</span>
+                          <p className="text-white font-medium">{movie?.quocgia}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-800 rounded-lg">
+                          <Clock className="w-5 h-5 text-green-500" />
+                        </div>
+                        <div>
+                          <span className="text-gray-500 text-sm">Thời lượng</span>
+                          <p className="text-white font-medium">{movie?.thoi_luong}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-800 rounded-lg">
+                          <Film className="w-5 h-5 text-purple-500" />
+                        </div>
+                        <div>
+                          <span className="text-gray-500 text-sm">Thể loại</span>
+                          <p className="text-white font-medium">
+                            {movie?.theloai?.map((tl, index) => (
+                              <span key={index}>
+                                {tl.ten}{index < movie.theloai.length - 1 ? ', ' : ''}
+                              </span>
+                            ))}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-800 rounded-lg">
+                          <User className="w-5 h-5 text-yellow-500" />
+                        </div>
+                        <div>
+                          <span className="text-gray-500 text-sm">Đạo diễn</span>
+                          <p className="text-white font-medium">{movie?.daodien}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-800 rounded-lg">
+                          <span className="text-orange-500 font-bold">HD</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 text-sm">Chất lượng</span>
+                          <p className="text-white font-medium">HD Vietsub</p>
+                        </div>
+                      </div>
+
+
                     </div>
                   </div>
+
+                  {/* dien vien */}
+                  <div className="bg-gray-900/50 backdrop-blur rounded-2xl p-8 mb-8 border border-gray-800">
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-white mb-1">Dàn Diễn Viên</h3>
+                      <div className="h-1 w-20 bg-gradient-to-r from-red-500 to-orange-500 rounded-full"></div>
+                    </div>
+
+                    {/* Cast Grid */}
+                    <div className="relative">
+                      {/* Scroll Container */}
+                      <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+                        {movie?.dienvien?.map((dv, index) => (
+                          <div
+                            key={dv.id}
+                            onClick={() => router.push(`/actor/${dv.id}`)}
+                            className="flex-shrink-0 group cursor-pointer transform transition-all duration-300 hover:scale-105"
+                          >
+                            {/* Actor Card */}
+                            <div className="text-center w-28 md:w-32">
+                              {/* Avatar Container */}
+                              <div className="relative mb-3">
+                                <div className="relative w-24 h-24 md:w-28 md:h-28 mx-auto">
+                                  {/* Glow Effect on Hover */}
+                                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-full opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300"></div>
+
+                                  {/* Avatar Image */}
+                                  <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-gray-700 group-hover:border-red-500 transition-colors duration-300">
+                                    {dv.anh ? (
+                                      <img
+                                        src={dv.anh}
+                                        alt={dv.ten}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                        onError={(e) => {
+                                          e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(dv.ten) + '&background=1f2937&color=fff&size=200';
+                                        }}
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                                        <svg className="w-12 h-12 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                        </svg>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Online/Active Indicator (optional) */}
+                                  {index === 0 && (
+                                    <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+                                      Chính
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Actor Name */}
+                              <p className="text-white font-medium text-sm group-hover:text-red-400 transition-colors duration-300 line-clamp-2">
+                                {dv.ten}
+                              </p>
+
+                              {/* Role (if available) */}
+                              {dv.vaitro && (
+                                <p className="text-gray-500 text-xs mt-1 line-clamp-1">
+                                  {dv.vaitro}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* View More Button (if many actors) */}
+                        {movie?.dienvien?.length > 8 && (
+                          <div className="flex-shrink-0 flex items-center">
+                            <button
+                              onClick={() => router.push(`/movie/${movie.id}/cast`)}
+                              className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-800/50 border-2 border-gray-700 hover:border-red-500 flex flex-col items-center justify-center group transition-all duration-300 hover:scale-105"
+                            >
+                              <svg className="w-8 h-8 text-gray-400 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                              </svg>
+                              <span className="text-gray-400 group-hover:text-red-400 text-xs mt-1 transition-colors">Xem thêm</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Gradient Fade Edges */}
+                      {movie?.dienvien?.length > 5 && (
+                        <>
+                          <div className="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-gray-900 to-transparent pointer-events-none"></div>
+                          <div className="absolute right-0 top-0 bottom-4 w-8 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none"></div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* CSS cho scrollbar ẩn */}
+                  <style jsx>{`
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+`}</style>
                 </div>
               )}
             </div>

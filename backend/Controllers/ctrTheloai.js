@@ -10,6 +10,14 @@ const getAll = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getAllUser = async (req, res) => {
+  try {
+    const data = await theloai.getAllUser();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 const getbyid = async (req, res) => {
   try {
     const id = req.params.id
@@ -51,6 +59,7 @@ const deleteTheloai = async (req, res) => {
 
 module.exports = {
   getAll,
+  getAllUser,
   getbyid,
   create,
   update,

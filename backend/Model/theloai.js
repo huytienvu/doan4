@@ -13,7 +13,10 @@ const query = util.promisify(db.query).bind(db);
 // }
 class Theloai {
   async getAll() {
-    return await helper('SELECT * FROM theloai');
+    return await helper('SELECT * FROM theloai ');
+  }
+  async getAllUser() {
+    return await helper(`SELECT * FROM theloai WHERE status=N'Hiển thị'`);
   }
 
   async getbyid(id) {
