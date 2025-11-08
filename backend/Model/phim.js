@@ -145,6 +145,7 @@ WHERE pdv.dien_vien_id = ?`, [id]);
 
       const tapphim = await query('SELECT t.phim_id,t.id,t.so_tap,t.video_url from `tap_phim` t WHERE t.phim_id=?', [id]);
       phim[0].tapphim = tapphim;
+      
       const obj = phim[0];
       return obj
     } catch (error) {

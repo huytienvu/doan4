@@ -13,11 +13,16 @@ const yeuthichRoutes= require('./Routes/routesYeuthich');
 const lichsuRoutes= require('./Routes/routesLichsu');
 const binhluanRoutes =require('./Routes/routesBinhluan')
 const danhgiaRoutes =require('./Routes/routesDanhgia')
+const goiVipRoutes =require('./Routes/routesGoiVip')
+const thanhtoanRoutes =require('./Routes/routesThanhtoan')
 
 const phimAdminROutes =require('./Routes/admin/routesAdminPhim');
 const theloaiAdminRoutes = require('./Routes/admin/routesAdminTheloai')
 const quocgiaAdminRoutes = require('./Routes/admin/routesAdminQuocgia')
 const thongkeAdminRoutes = require('./Routes/admin/routesAdminThongke')
+
+const VnpayRoutes = require('./Routes/routesVNpay')
+
 const app = express();
 const path = require('path');
 
@@ -37,12 +42,16 @@ app.use('/api/yeuthich', yeuthichRoutes);
 app.use('/api/lichsu', lichsuRoutes);
 app.use('/api/binhluan', binhluanRoutes);
 app.use('/api/danhgia',danhgiaRoutes);
+app.use('/api/goivip',goiVipRoutes);
+app.use('/api/hoadon',thanhtoanRoutes);
 
 
 app.use('/api/admin/phim',phimAdminROutes);
 app.use('/api/admin/theloai',theloaiAdminRoutes)
 app.use('/api/admin/thongke',thongkeAdminRoutes)
 app.use('/api/admin/quocgia',quocgiaAdminRoutes)
+
+app.use('/api/vnpay',VnpayRoutes)
 
 const PORT = process.env.PORT || 5273;
 const HOST = "0.0.0.0";

@@ -273,6 +273,18 @@ const Header = () => {
                     </li>
                     <li>
                       <Link
+                        href="/upgrade"
+                        className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-red-500/10 hover:to-orange-500/10 transition-all duration-200"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                        </svg>
+                        Nâng cấp tài khoản
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
                         href="/favorite"
                         className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-red-500/10 hover:to-orange-500/10 transition-all duration-200"
                         onClick={() => setShowUserMenu(false)}
