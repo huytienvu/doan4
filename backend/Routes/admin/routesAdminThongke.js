@@ -9,4 +9,8 @@ router.get('/tongquan',authenticate,Admin, thongkeController.Tongquan);
 router.get('/countphim',authenticate,Admin, thongkeController.Thongke_top_phim_Category_Country_Actor);
 router.get('/top5phimnhieuluotxem',authenticate,Admin, thongkeController.Top5_phim_nhieu_luot_xem);
 router.get('/get_created_at',authenticate,Admin, thongkeController.get_created_at);
+router.get('/topratting', thongkeController.get_topRatting);
+router.get('/topfavorite', thongkeController.get_topFavorite);
+router.get('/doanhthu', authenticate, Admin, thongkeController.Doanhthu);
+
 module.exports = router;

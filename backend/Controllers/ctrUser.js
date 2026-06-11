@@ -35,7 +35,8 @@ class AuthController {
         {
           id: user.id,
           username: user.username,
-          role: user.loai_tai_khoan
+          role: user.loai_tai_khoan,
+          vip: user.userlevel
         },
         JWT_SECRET,
         { expiresIn: "24h" }
@@ -56,6 +57,18 @@ class AuthController {
       res.status(500).json({ error: "Lỗi server" });
     }
   }
+  async checkVip(req, res) {
+
+    try {
+      const id = req.params.id
+      const result = await users.checkVip(id);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+
+  }
 }
+
 
 module.exports = new AuthController();

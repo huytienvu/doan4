@@ -109,6 +109,16 @@ const update = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const statePhim = async (req, res) => {
+  try {
+
+    const data = req.body;
+    const result = await phim.statePhim(data);
+    res.status(201).json({ message: "Cập nhật state phim thành công" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 module.exports = {
   getAllPhim,
   getPhimBoLe,
@@ -121,5 +131,6 @@ module.exports = {
   LocPhim,
   SearchPhim,
   create,
-  update
+  update,
+  statePhim
 };

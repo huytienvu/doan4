@@ -9,6 +9,9 @@ import { getListMovie } from "@/services/movie";
 import { useRouter } from "next/navigation";
 import { IMAGE_URL } from "@/config/config";
 import { ArrowRight } from "lucide-react";
+import { Checkvip } from "@/services/vip";
+import { Getiduser } from "@/utils/auth";
+import { xemphim } from "@/utils/checkvip";
 
 const Slider = dynamic(() => import("react-slick"), { ssr: false });
 
@@ -25,6 +28,7 @@ export default function MovieSlider({ huy , data=[]}) {
     fet();
   }, []);
 
+  
   const settings = {
     dots: false,
     infinite: true,
@@ -69,7 +73,7 @@ export default function MovieSlider({ huy , data=[]}) {
               <div
                 key={movie.id}
                 className="px-2 cursor-pointer"
-                onClick={() => router.push(`/movie?id=${movie.id}`)}
+                onClick={() => xemphim(movie.id,router)}
               >
                 <div className="bg-gray-900 rounded-lg overflow-hidden shadow-lg transform transition-transform duration-300 hover:scale-105">
                   <div className="relative w-full h-48">

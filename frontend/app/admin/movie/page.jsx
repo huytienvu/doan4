@@ -26,7 +26,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import { getListMovie, getMoviebyId, CreateMovie, UpdateMovie } from '../../../services/admin/movie';
+import { getListMovie, getMoviebyId, CreateMovie, UpdateMovie, StateMovie } from '../../../services/admin/movie';
 import { getAllCategory } from '../../../services/category';
 import { getAllActor } from '../../../services/actor';
 import { getAllCountry } from '../../../services/quocgia';
@@ -441,13 +441,18 @@ const MovieAdminInterface = () => {
       // await updateMovieStatus(movieId, newStatus);
 
       // Update local state
-      setPhim(prevMovies =>
-        prevMovies.map(movie =>
-          movie.id === movieId
-            ? { ...movie, status: newStatus }
-            : movie
-        )
-      );
+      // setPhim(prevMovies =>
+      //   prevMovies.map(movie =>
+      //     movie.id === movieId
+      //       ? { ...movie, status: newStatus }
+      //       : movie
+      //   )
+      // );
+      await StateMovie({
+        state : newStatus,
+        id : movieId
+      })
+      await fetchMovies();
 
       // Show success notification
       alert(`Đã ${action} phim thành công!`);

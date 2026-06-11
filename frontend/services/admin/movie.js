@@ -18,4 +18,8 @@ export const UpdateMovie = async (id, data) => {
   const res = await api.put(`/admin/phim/${id}`, data);
   return res.data;
 };
+export const StateMovie = async (data) => {
+  const res = await api.put(`/admin/phim/state`, data);
+  return res.data;
+};
 

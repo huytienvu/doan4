@@ -16,3 +16,15 @@ export const get_created_at = async () => {
   const res = await api.get(`/admin/thongke/get_created_at`);
   return res.data;
 };
+export const get_topRatting = async () => {
+  const res = await api.get(`/admin/thongke/topratting`);
+  return res.data;
+};
+export const get_topFavorite = async () => {
+  const res = await api.get(`/admin/thongke/topfavorite`);
+  return res.data;
+};
+export const getDoanhthu = async () => {
+  const res = await api.get(`/admin/thongke/doanhthu`);
+  return res.data;
+};

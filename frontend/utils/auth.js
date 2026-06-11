@@ -29,3 +29,31 @@ export function getRole() {
     return null;
   }
 }
+export function getuserName() {
+  const token = Gettoken();
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.username || null;
+  } catch (error) {
+    return null;
+  }
+}
+export function getVip() {
+  const token = Gettoken();
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode(token);
+    const vip = decoded.vip
+    if(vip=="VIP"){
+      return true;
+    }
+    else{
+      return false
+    }
+  } catch (error) {
+    return null;
+  }
+}

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { IMAGE_URL } from "@/config/config";
 import { ArrowRight } from "lucide-react"; // 🠔 thêm icon
 import { getMovieLoai } from "@/services/movie";
-import { Getiduser } from "@/utils/auth";
+import { Getiduser, getVip } from "@/utils/auth";
 
 export default function Home() {
     const router = useRouter();
@@ -23,6 +23,8 @@ export default function Home() {
             const resLe = await getMovieLoai('le',1)
             const resBo = await getMovieLoai('bo',1)
 
+            console.log(getVip());
+            
             setMovieLe(resLe.phim)
             setMovieBo(resBo.phim)
 

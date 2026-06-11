@@ -6,7 +6,7 @@ const query = util.promisify(db.query).bind(db);
 class Phim {
   async getAllPhim() {
     try {
-      const phim = await query('SELECT * FROM phim');
+      const phim = await query('SELECT * FROM phim  ORDER BY created_at DESC');
       for (const p of phim) {
         const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [p.id]);
         p.theloai = theloai;
@@ -28,7 +28,7 @@ class Phim {
       const total_items = countResult[0].total;
       const total_pages = Math.ceil(total_items / page_size);
 
-      const phim = await query(`SELECT * FROM phim where loai = ? LIMIT ${page_size} OFFSET ${offset}`, [loai]);
+      const phim = await query(`SELECT * FROM phim where loai = ? ORDER BY created_at DESC LIMIT ${page_size} OFFSET ${offset}`, [loai]);
       for (const p of phim) {
         const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [p.id]);
         p.theloai = theloai;
@@ -56,7 +56,7 @@ class Phim {
       const total_items = countResult[0].total;
       const total_pages = Math.ceil(total_items / page_size);
 
-      const phim = await query(`SELECT * FROM phim where quocgia = ? LIMIT ${page_size} OFFSET ${offset}`, [quocgia]);
+      const phim = await query(`SELECT * FROM phim where quocgia = ? ORDER BY created_at DESC LIMIT ${page_size} OFFSET ${offset}`, [quocgia]);
       for (const p of phim) {
         const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [p.id]);
         p.theloai = theloai;
@@ -85,7 +85,7 @@ class Phim {
       const total_items = countResult[0].total;
       const total_pages = Math.ceil(total_items / page_size);
 
-      const phim = await query(`SELECT id,ten, p.ten_tieng_anh,p.mota,p.anh_dai_dien,p.daodien,p.quocgia,p.ngay_phat_hanh,p.trang_thai,p.loai,p.thoi_luong,p.video_url,p.created_at FROM phim p INNER JOIN phim_theloai ptl on ptl.phim_id=p.id WHERE ptl.theloai_id=? GROUP by p.ten LIMIT ${page_size} OFFSET ${offset}`, [id]);
+      const phim = await query(`SELECT id,ten, p.ten_tieng_anh,p.mota,p.anh_dai_dien,p.daodien,p.quocgia,p.ngay_phat_hanh,p.trang_thai,p.loai,p.thoi_luong,p.video_url,p.created_at FROM phim p INNER JOIN phim_theloai ptl on ptl.phim_id=p.id WHERE ptl.theloai_id=? GROUP by p.ten ORDER BY created_at DESC LIMIT ${page_size} OFFSET ${offset}`, [id]);
       for (const p of phim) {
         const theloai = await query('SELECT id,ten FROM theloai LEFT JOIN phim_theloai p on p.theloai_id=id WHERE p.phim_id=?', [p.id]);
         p.theloai = theloai;
@@ -322,6 +322,18 @@ WHERE pdv.dien_vien_id = ?`, [id]);
       }
 
       return { id, ...data };
+    } catch (err) {
+      throw err;
+    }
+  }
+  async statePhim(data) {
+    const {state,id} = data;
+    try {
+      const rows = await query(
+        `update Phim set status = ? where id = ?`,
+        [state,id]
+      );
+      return rows; 
     } catch (err) {
       throw err;
     }

@@ -3,8 +3,8 @@ const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnp
 const Thanhtoan = require('../Model/thanhtoan');
 const thanhtoan =new Thanhtoan()
 const vnpay = new VNPay({
-    tmnCode: 'JJV78UW2',
-    secureSecret: '2IOFLGWYMX56EPDPJP0L213VM3L6MM18',
+    tmnCode: 'Q3WR70K5',
+    secureSecret: '0ZK5MJJ7RQYK4FO8CAETR5VZ39LT1WVJ',
     vnpayHost: 'https://sandbox.vnpayment.vn/',
     testMode: true,
     hashAlgorithm: 'SHA512',

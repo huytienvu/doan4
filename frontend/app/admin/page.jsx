@@ -107,43 +107,31 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
           <div className="relative">
             <div className="w-20 h-20 border-4 border-gray-700 rounded-full"></div>
             <div className="w-20 h-20 border-4 border-red-500 rounded-full animate-spin absolute top-0 left-0 border-t-transparent"></div>
           </div>
-          <p className="mt-4 text-gray-400">Đang tải dữ liệu...</p>
+          <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6">
+    <div className="min-h-screen bg-gray-50 text-gray-900 p-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold text-gray-900">
               Dashboard Quản Trị
             </h1>
-            <p className="text-gray-400 mt-2">Chào mừng trở lại! Đây là tổng quan hệ thống phim của bạn</p>
+            <p className="text-gray-600 mt-2">Chào mừng trở lại! Đây là tổng quan hệ thống phim của bạn</p>
           </div>
           <div className="flex items-center gap-4">
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:border-blue-500 focus:outline-none"
-            >
-              <option value="today">Hôm nay</option>
-              <option value="7days">7 ngày qua</option>
-              <option value="30days">30 ngày qua</option>
-              <option value="year">Năm nay</option>
-            </select>
-            <button className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-2 rounded-lg hover:shadow-lg transition-all">
-              Xuất báo cáo
-            </button>
+            
           </div>
         </div>
       </div>
@@ -151,74 +139,62 @@ export default function AdminDashboard() {
       {/* Main Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Total Movies */}
-        <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/50 backdrop-blur rounded-2xl p-6 border border-blue-700/50 hover:shadow-2xl hover:shadow-blue-500/20 transition-all">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-blue-500/20 rounded-xl">
-              <FilmIcon className="h-8 w-8 text-blue-400" />
+            <div className="p-3 bg-blue-50 rounded-xl">
+              <FilmIcon className="h-8 w-8 text-blue-600" />
             </div>
-            <div className={`flex items-center gap-1 text-sm ${stats.moviesGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {stats.moviesGrowth > 0 ? <ArrowUpIcon className="h-4 w-4" /> : <ArrowDownIcon className="h-4 w-4" />}
-              {Math.abs(stats.moviesGrowth)}%
-            </div>
+            
           </div>
-          <h3 className="text-3xl font-bold mb-1">{tongquan.phim}</h3>
-          <p className="text-gray-400 text-sm">Tổng số phim</p>
-          <div className="mt-3 pt-3 border-t border-gray-700">
-            <span className="text-xs text-gray-500">Phim mới hôm nay: 99</span>
+          <h3 className="text-3xl font-bold mb-1 text-gray-900">{tongquan.phim}</h3>
+          <p className="text-gray-600 text-sm">Tổng số phim</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            
           </div>
         </div>
 
         {/* Total Users */}
-        <div className="bg-gradient-to-br from-green-900/50 to-green-800/50 backdrop-blur rounded-2xl p-6 border border-green-700/50 hover:shadow-2xl hover:shadow-green-500/20 transition-all">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-500/20 rounded-xl">
-              <UsersIcon className="h-8 w-8 text-green-400" />
+            <div className="p-3 bg-green-50 rounded-xl">
+              <UsersIcon className="h-8 w-8 text-green-600" />
             </div>
-            <div className={`flex items-center gap-1 text-sm ${stats.usersGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {stats.usersGrowth > 0 ? <ArrowUpIcon className="h-4 w-4" /> : <ArrowDownIcon className="h-4 w-4" />}
-              {Math.abs(stats.usersGrowth)}%
-            </div>
+            
           </div>
-          <h3 className="text-3xl font-bold mb-1">{tongquan.user}</h3>
-          <p className="text-gray-400 text-sm">Tổng người dùng</p>
-          <div className="mt-3 pt-3 border-t border-gray-700">
-            <span className="text-xs text-gray-500">Mới hôm nay: 99</span>
+          <h3 className="text-3xl font-bold mb-1 text-gray-900">{tongquan.user}</h3>
+          <p className="text-gray-600 text-sm">Tổng người dùng</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            {/* <span className="text-xs text-gray-500">Mới hôm nay: 99</span> */}
           </div>
         </div>
 
         {/* Total Views */}
-        <div className="bg-gradient-to-br from-purple-900/50 to-purple-800/50 backdrop-blur rounded-2xl p-6 border border-purple-700/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-500/20 rounded-xl">
-              <EyeIcon className="h-8 w-8 text-purple-400" />
+            <div className="p-3 bg-purple-50 rounded-xl">
+              <EyeIcon className="h-8 w-8 text-purple-600" />
             </div>
-            <div className={`flex items-center gap-1 text-sm ${stats.viewsGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {stats.viewsGrowth > 0 ? <ArrowUpIcon className="h-4 w-4" /> : <ArrowDownIcon className="h-4 w-4" />}
-              {Math.abs(stats.viewsGrowth)}%
-            </div>
+            
           </div>
-          <h3 className="text-3xl font-bold mb-1">{tongquan.luotxem}</h3>
-          <p className="text-gray-400 text-sm">Tổng lượt xem</p>
-          <div className="mt-3 pt-3 border-t border-gray-700">
-            <span className="text-xs text-gray-500">Đang xem: 99</span>
+          <h3 className="text-3xl font-bold mb-1 text-gray-900">{tongquan.luotxem}</h3>
+          <p className="text-gray-600 text-sm">Tổng lượt xem</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            {/* <span className="text-xs text-gray-500">Đang xem: 99</span> */}
           </div>
         </div>
 
         {/* Total Actors */}
-        <div className="bg-gradient-to-br from-orange-900/50 to-orange-800/50 backdrop-blur rounded-2xl p-6 border border-orange-700/50 hover:shadow-2xl hover:shadow-orange-500/20 transition-all">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-orange-500/20 rounded-xl">
-              <UsersIcon className="h-8 w-8 text-orange-400" />
+            <div className="p-3 bg-orange-50 rounded-xl">
+              <UsersIcon className="h-8 w-8 text-orange-600" />
             </div>
-            <div className={`flex items-center gap-1 text-sm ${stats.actorsGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {stats.actorsGrowth > 0 ? <ArrowUpIcon className="h-4 w-4" /> : <ArrowDownIcon className="h-4 w-4" />}
-              {Math.abs(stats.actorsGrowth)}%
-            </div>
+            
           </div>
-          <h3 className="text-3xl font-bold mb-1">{tongquan.dienvien}</h3>
-          <p className="text-gray-400 text-sm">Tổng diễn viên</p>
-          <div className="mt-3 pt-3 border-t border-gray-700">
-            <span className="text-xs text-gray-500">Rating TB: 99/5</span>
+          <h3 className="text-3xl font-bold mb-1 text-gray-900">{tongquan.dienvien}</h3>
+          <p className="text-gray-600 text-sm">Tổng diễn viên</p>
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            {/* <span className="text-xs text-gray-500">Rating TB: 99/5</span> */}
           </div>
         </div>
       </div>
@@ -226,9 +202,9 @@ export default function AdminDashboard() {
       {/* Charts and Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Main Chart */}
-        <div className="lg:col-span-2 bg-gray-800/50 backdrop-blur rounded-2xl p-6 border border-gray-700">
+        <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold">Thống kê Top 5 phim nhiều lượt xem</h3>
+            <h3 className="text-xl font-bold text-gray-900">Thống kê Top 5 phim nhiều lượt xem</h3>
 
           </div>
 
@@ -260,49 +236,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Real-time Stats */}
-        <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-6 border border-gray-700">
-          <h3 className="text-xl font-bold mb-6">Thời gian thực</h3>
-          <div className="space-y-4">
-            {/* Online Users */}
-            <div className="p-4 bg-green-900/30 rounded-xl border border-green-700/50">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-400">Người dùng online</span>
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                  </span>
-                  <span className="text-sm text-green-400">Live</span>
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-green-400">{stats.onlineUsers}</p>
-            </div>
-
-            {/* Watching Now */}
-            <div className="p-4 bg-blue-900/30 rounded-xl border border-blue-700/50">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-400">Đang xem phim</span>
-                <PlayCircleIcon className="h-5 w-5 text-blue-400" />
-              </div>
-              <p className="text-2xl font-bold text-blue-400">{stats.watchingNow}</p>
-            </div>
-
-            {/* Today Stats */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-gray-400">Phim mới hôm nay</span>
-                <span className="text-sm font-semibold">{stats.todayNewMovies}</span>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-gray-400">Người dùng mới</span>
-                <span className="text-sm font-semibold">{stats.todayNewUsers}</span>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-gray-400">Bình luận mới</span>
-                <span className="text-sm font-semibold">{stats.totalComments}</span>
-              </div>
-            </div>
-          </div>
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          
         </div>
       </div>
 
@@ -343,10 +278,10 @@ export default function AdminDashboard() {
         </div> */}
 
         {/* Category Distribution */}
-        <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-6 border border-gray-700">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold">Phân bố thể loại</h3>
-            <span className="text-sm text-gray-400">Tổng: {countphim.theloai.length} thể loại</span>
+            <h3 className="text-xl font-bold text-gray-900">Phân bố thể loại</h3>
+            <span className="text-sm text-gray-500">Tổng: {countphim.theloai.length} thể loại</span>
           </div>
           <div className="space-y-3">
             {countphim.theloai.map((category, index) => (
@@ -366,7 +301,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-6 border border-gray-700">
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold">Phân bố quốc gia</h3>
             <span className="text-sm text-gray-400">Tổng: {countphim.quoc_gia.length} quốc gia</span>
@@ -393,11 +328,11 @@ export default function AdminDashboard() {
       {/* Recent Activities and Top Actors */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activities */}
-        <div className="lg:col-span-2 bg-gray-800/50 backdrop-blur rounded-2xl p-6 border border-gray-700">
-          <h3 className="text-xl font-bold mb-6">Hoạt động gần đây</h3>
+        <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          <h3 className="text-xl font-bold text-gray-900 mb-6">Hoạt động gần đây</h3>
           <div className="space-y-3">
 
-            <div className="flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl hover:bg-gray-900/70 transition-all">
+            <div className="flex items-center gap-4 p-3 bg-white/50 rounded-xl hover:bg-white/70 transition-all">
               <div className="p-2 rounded-lg bg-blue-500/20">
                 <FilmIcon className="h-5 w-5 bg-blue-500/20" />
               </div>
@@ -408,7 +343,7 @@ export default function AdminDashboard() {
               <span className="text-xs text-gray-500">1 phút trước</span>
             </div>
 
-            <div className="flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl hover:bg-gray-900/70 transition-all">
+            <div className="flex items-center gap-4 p-3 bg-white/50 rounded-xl hover:bg-white/70 transition-all">
               <div className="p-2 rounded-lg bg-green-300/20">
                 <UsersIcon className="h-5 w-5 bg-green-300/10" />
               </div>
@@ -423,12 +358,12 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top Actors */}
-        <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-6 border border-gray-700">
-          <h3 className="text-xl font-bold mb-6">Top diễn viên</h3>
+        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          <h3 className="text-xl font-bold text-gray-900 mb-6">Top diễn viên</h3>
           <div className="space-y-4">
             {countphim.dien_vien.map((actor, index) => (
               <div key={actor.id} className="flex items-center gap-3">
-                <span className="text-lg font-bold text-gray-600 w-6">#{index + 1}</span>
+                <span className="text-lg font-bold text-gray-400 w-6">#{index + 1}</span>
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
                     <img src={actor.anh.startsWith('http') ? actor.anh : `http://localhost:5273/upload/dienvien/${actor.anh}`} alt={`actor`} className="w-10 h-10 object-cover rounded-lg" />

@@ -5,6 +5,8 @@ import { getAllCategory } from '../../../services/category';
 import { getAllCountry } from '../../../services/quocgia';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getuserName, getVip } from '@/utils/auth';
+import { CrownIcon } from 'lucide-react';
 
 const Header = () => {
   const [arrCategory, setarrCategory] = useState([]);
@@ -13,6 +15,8 @@ const Header = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const [isVip, setIsVip] = useState(false);
   const menuRef = useRef(null);
   const router = useRouter();
 
@@ -21,6 +25,8 @@ const Header = () => {
     const country = await getAllCountry();
     setarrCategory(cate);
     setarrCountry(country);
+    const vipStatus = getVip();
+    setIsVip(vipStatus === true);
   };
 
   useEffect(() => {
@@ -64,11 +70,10 @@ const Header = () => {
   }, []);
 
   return (
-    <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${
-      isScrolled 
-        ? 'bg-black/95 backdrop-blur-lg shadow-2xl py-3' 
-        : 'bg-gradient-to-b from-black via-black/90 to-transparent py-5'
-    }`}>
+    <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled
+      ? 'bg-black/95 backdrop-blur-lg shadow-2xl py-3'
+      : 'bg-gradient-to-b from-black via-black/90 to-transparent py-5'
+      }`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -190,11 +195,11 @@ const Header = () => {
               </div>
             </div>
 
-            <Link href="#" className="nav-item group">
+            {/* <Link href="#" className="nav-item group">
               <span className="px-3 py-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold text-sm shadow-lg hover:shadow-red-500/25 transition-all duration-300 hover:scale-105">
                 TOP PHIM
               </span>
-            </Link>
+            </Link> */}
           </nav>
 
           {/* Search & User Section */}
@@ -247,7 +252,14 @@ const Header = () => {
                     height={42}
                     className="rounded-full border-2 border-gray-600 hover:border-red-500 transition-all duration-300"
                   />
+
                   <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-black rounded-full"></div>
+
+                  {isVip && (
+                    <div className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 p-1.5 rounded-full shadow-lg border-2 border-black">
+                      <CrownIcon className="h-3 w-3 text-white" />
+                    </div>
+                  )}
                 </div>
               </button>
 
@@ -256,7 +268,7 @@ const Header = () => {
                 <div className="absolute right-0 mt-3 w-56 bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-xl shadow-2xl overflow-hidden">
                   <div className="px-4 py-3 border-b border-gray-700/50">
                     <p className="text-sm text-gray-400">Xin chào!</p>
-                    <p className="text-white font-medium truncate">user@example.com</p>
+                    <p className="text-white font-medium truncate">{getuserName()}</p>
                   </div>
                   <ul className="py-2">
                     <li>
@@ -339,7 +351,7 @@ const Header = () => {
               <Link href="#" className="text-white hover:text-red-400 py-2 transition-colors">THỂ LOẠI</Link>
               <Link href="#" className="text-white hover:text-red-400 py-2 transition-colors">QUỐC GIA</Link>
               <Link href="#" className="text-red-400 font-bold py-2">TOP PHIM</Link>
-              
+
               {/* Mobile Search */}
               <form onSubmit={handleSearch} className="mt-3">
                 <div className="relative">

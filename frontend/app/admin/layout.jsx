@@ -75,26 +75,12 @@ export default function AdminLayout({ children }) {
       color: 'from-indigo-500 to-purple-500'
     },
     {
-      name: 'Lịch chiếu',
-      href: '/admin/schedule',
-      icon: CalendarDaysIcon,
-      iconSolid: CalendarDaysIcon,
-      color: 'from-teal-500 to-cyan-500'
-    },
-    {
       name: 'Thống kê',
-      href: '/admin/analytics',
+      href: '/admin/thongke',
       icon: ChartBarIcon,
       iconSolid: ChartBarIcon,
       color: 'from-yellow-500 to-orange-500'
-    },
-    {
-      name: 'Cài đặt',
-      href: '/admin/settings',
-      icon: Cog6ToothIcon,
-      iconSolid: Cog6ToothIconSolid,
-      color: 'from-gray-500 to-gray-700'
-    },
+    }
   ];
   const token = localStorage.getItem("token");
   const role = getRole();
