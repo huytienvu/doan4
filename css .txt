@@ -1,2 +1,0 @@
-padding px-4 trai phai py-8 tren duoi
-margin
